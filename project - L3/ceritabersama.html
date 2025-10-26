@@ -127,6 +127,23 @@
   transition: 0.15s ease;
 }
 
+/* Tambahan untuk warna ungu tipis */
+body::before {
+  content: "";
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+  z-index: 1;
+  background: linear-gradient(180deg, rgba(128, 72, 200, 0.05), rgba(176, 140, 255, 0.06));
+}
+
+@keyframes pulse {
+  0% { transform: scale(0.6); opacity:0.4 }
+  100% { transform: scale(1.3); opacity:1 }
+}
+
+
+
 </style>
 </head>
 <body>
@@ -139,12 +156,12 @@
       <div class="logo">L3</div>
       <div>
         <h1>Catatan Harian</h1>
-        <p>Blog & cerita singkat — tema ungu-cyan transparan</p>
+        <p>Blog & cerita singkat </p>
       </div>
     </div>
 
     <div class="controls" aria-hidden>
-      <div class="chip">Tema: Transparen</div>
+      <div class="chip">Threelogy</div>
       <div class="chip" id="countChip">Posting: 0</div>
     </div>
   </div>
@@ -158,7 +175,7 @@
     <!-- Right panel: form + filter -->
     <aside class="right-panel" aria-label="Tambah catatan">
       <h3>Tambah Catatan</h3>
-      <div style="font-size:13px;color:var(--muted);margin-bottom:8px">Tulis cerita singkat — disimpan di browser</div>
+      <div style="font-size:13px;color:var(--muted);margin-bottom:8px">Tulis cerita singkat </div>
 
       <div class="form-row">
         <input id="title" type="text" placeholder="Judul (opsional)" aria-label="Judul"/>
@@ -170,7 +187,7 @@
         <textarea id="content" placeholder="Tulis cerita, ringkasan kegiatan, atau catatan harian..." aria-label="Isi catatan"></textarea>
       </div>
       <div style="display:flex;gap:8px">
-        <button id="addBtn" class="btn">Tambah</button>
+        <button id="addBtn" class="btn">Kirim</button>
         <button id="clearAll" class="btn ghost" title="Hapus semua (localStorage)">Hapus Semua</button>
       </div>
 
@@ -185,7 +202,7 @@
   </div>
 </div>
 
-<a class="back-mini" href="L3.html" title="Kembali">←</a>
+<a class="back-mini" href="index.html" title="Kembali">←</a>
 
 <script>
 /* =====================
@@ -235,6 +252,10 @@ function initParticles(){
 }
 function loop(){
   ctx.clearRect(0,0,W,H);
+  
+ctx.fillStyle = 'rgba(176,140,255,0.04)'; // ungu tipis
+ctx.fillRect(0,0,W,H);
+
   // subtle vignette overlay
   const g = ctx.createLinearGradient(0,0,0,H);
   g.addColorStop(0,'rgba(0,0,0,0.00)');
@@ -402,6 +423,30 @@ document.addEventListener('mousemove', e => {
     card.style.setProperty('--y', `${y}px`);
   });
 });
+
+function addPulseDots(){
+  timelineEl.querySelectorAll('.dot').forEach(dot=>{
+    // hapus dulu span lama jika ada
+    const old = dot.querySelector('span');
+    if(old) old.remove();
+
+    const glow = document.createElement('span');
+    glow.style.cssText = `
+      position:absolute;
+      inset:0; /* penuh di dot */
+      border-radius:50%;
+      background: rgba(138,43,226,0.6);
+      animation: pulse 1.6s infinite alternate;
+    `;
+    dot.appendChild(glow);
+  });
+}
+
+// panggil ini **setiap render**
+render();
+addPulseDots();
+
+
 
 </script>
 
