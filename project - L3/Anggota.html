@@ -1,0 +1,925 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Kelas L3 - Profile Anggota</title>
+  <style>
+    /* Reset */
+    * { margin:0; padding:0; box-sizing:border-box; }
+
+    body {
+      font-family: Arial, sans-serif;
+      background: #0d0d1a;
+      color: #fff;
+      overflow-x: hidden;
+    }
+
+    /* Navbar */
+    nav {
+      display:flex;
+      justify-content:center;
+      gap:40px;
+      padding:20px;
+      background:#111;
+      position:sticky;
+      top:0;
+      z-index:1000;
+    }
+    nav a {
+      color:#fff;
+      text-decoration:none;
+      font-weight:bold;
+      position:relative;
+      padding-bottom:5px;
+    }
+    nav a::after {
+      content:"";
+      position:absolute;
+      bottom:0;
+      left:0;
+      width:0%;
+      height:2px;
+      background:#00ffcc;
+      transition:width 0.3s;
+    }
+    nav a:hover::after, nav a.active::after {
+      width:100%;
+    }
+
+    /* Hero */
+    .hero {
+      height:80vh;
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      background:url("kelasL3.jpg") no-repeat center/cover;
+      position:relative;
+      text-align:center;
+    }
+    .hero::after {
+      content:"";
+      position:absolute;
+      top:0; left:0; right:0; bottom:0;
+      background:rgba(0,0,0,0.4);
+    }
+    .hero h1 {
+      position:relative;
+      font-size:30;
+      z-index:1;
+      text-shadow:0 0 15px #00ffcc;
+    }
+
+
+
+
+
+/* Efek ketikan */
+.hero h1 {
+  overflow: hidden;
+  white-space: nowrap;
+  border-right: 3px solid #00ffcc;
+  width: 0;
+  animation: typing 3s steps(30, end) forwards, blink 0.75s step-end infinite;
+}
+
+@keyframes typing {
+  from { width: 0; }
+  to { width: 100%; }
+}
+
+@keyframes blink {
+  50% { border-color: transparent; }
+}
+
+
+    /* Animasi teks hero masuk dari bawah dengan efek cahaya */
+@keyframes fadeSlide {
+  0% {
+    opacity: 0;
+    transform: translateY(40px);
+    text-shadow: none;
+  }
+  100% {
+    opacity: 1;
+    transform: translateY(0);
+    text-shadow: 0 0 25px #00ffcc, 0 0 50px #0077ff;
+  }
+}
+
+@keyframes glowPulse {
+  0%, 100% { text-shadow: 0 0 20px #00ffcc, 0 0 40px #0077ff; }
+  50% { text-shadow: 0 0 35px #00ffcc, 0 0 70px #0077ff; }
+}
+
+
+
+    /* Grid Anggota */
+    .anggota-grid {
+      display:grid;
+      grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+      gap:25px;
+      padding:50px;
+      position:relative;
+      z-index:1;
+    }
+    .anggota-card {
+      background:#1a1a2e;
+      border-radius:12px;
+      padding:20px;
+      text-align:center;
+      position:relative;
+      overflow:hidden;
+      transition:transform 0.3s, box-shadow 0.3s;
+      cursor:pointer;
+    }
+    .anggota-card:hover {
+      transform:translateY(-8px);
+      box-shadow:0 0 25px #00ffcc;
+    }
+    .anggota-card img {
+      width:100%;
+      height:250px;
+      object-fit:cover;
+      border-radius:8px;
+      margin-bottom:15px;
+    }
+    .anggota-card h3 {
+      margin-bottom:10px;
+      color:#00ffcc;
+    }
+    .badge {
+      position:absolute;
+      top:15px;
+      left:15px;
+      background:crimson;
+      color:#fff;
+      font-weight:bold;
+      padding:5px 10px;
+      border-radius:8px;
+    }
+
+    /* Modal */
+    .modal {
+      display:none;
+      position:fixed;
+      top:0; left:0;
+      width:100%; height:100%;
+      background:rgba(0,0,0,0.7);
+      justify-content:center;
+      align-items:center;
+      z-index:2000;
+    }
+    .modal-content {
+      background:#fff;
+      color:#000;
+      padding:30px;
+      border-radius:12px;
+      max-width:500px;
+      width:90%;
+      position:relative;
+    }
+    .close {
+      position:absolute;
+      top:15px;
+      right:20px;
+      font-size:24px;
+      cursor:pointer;
+    }
+
+    /* Canvas Partikel */
+    #particles {
+      position:fixed;
+      top:0; left:0;
+      width:100%; height:100%;
+      z-index:0;
+      background:#0d0d1a;
+    }
+
+    /* Efek kartu anggota muncul bergantian dari kiri dan kanan */
+.anggota-card {
+  opacity: 0;
+  transform: translateX(100px);
+  transition: all 0.8s ease;
+}
+
+.anggota-card.left {
+  transform: translateX(-100px);
+}
+
+.anggota-card.show {
+  opacity: 1;
+  transform: translateX(0);
+}
+
+
+
+
+.anggota-card:hover {
+  transform: translateY(-10px) scale(1.05) rotate3d(1, 1, 0, 5deg);
+  box-shadow: 0 0 25px rgba(0, 255, 204, 0.5);
+}
+
+/* Tombol Kembali */
+.btn-kembali {
+  position: fixed;
+  top: 20px;
+  left: 20px;
+  background: rgba(0, 255, 204, 0.15);
+  border: 2px solid #00ffcc;
+  color: #00ffcc;
+  font-weight: bold;
+  padding: 10px 18px;
+  border-radius: 12px;
+  cursor: pointer;
+  z-index: 2000;
+  transition: 0.3s;
+  backdrop-filter: blur(4px);
+}
+
+.btn-kembali:hover {
+  background: #00ffcc;
+  color: #000;
+  box-shadow: 0 0 15px #00ffcc;
+  transform: scale(1.05);
+}
+
+.btn-kembali {
+  opacity: 0;
+  animation: fadeInBtn 1s forwards 0.5s;
+}
+
+@keyframes fadeInBtn {
+  from { opacity: 0; transform: translateY(-10px); }
+  to { opacity: 1; transform: translateY(0); }
+  
+}
+
+/* Hamburger di pojok kanan atas */
+.hamburger {
+  position: fixed;
+  top: 20px;
+  right: 20px;
+  font-size: 28px;
+  color: #00ffcc;
+  cursor: pointer;
+  z-index: 2001;
+  background: rgba(0, 255, 204, 0.1);
+  border: 2px solid #00ffcc;
+  padding: 8px 12px;
+  border-radius: 10px;
+  transition: 0.3s;
+  backdrop-filter: blur(4px);
+}
+.hamburger:hover {
+  background: #00ffcc;
+  color: #000;
+  box-shadow: 0 0 15px #00ffcc;
+  transform: scale(1.05);
+}
+
+/* Menu muncul dari kanan */
+.nav-menu {
+  position: fixed;
+  top: 70px;
+  right: 20px;
+  background: rgba(17, 17, 34, 0.9);
+  border: 2px solid #00ffcc;
+  border-radius: 12px;
+  display: none;
+  flex-direction: column;
+  gap: 10px;
+  padding: 15px 25px;
+  box-shadow: 0 0 20px rgba(0, 255, 204, 0.3);
+  animation: fadeIn 0.4s ease;
+  z-index: 2000;
+}
+
+.nav-menu a {
+  color: #00ffcc;
+  text-decoration: none;
+  font-weight: bold;
+  transition: 0.3s;
+}
+.nav-menu a:hover {
+  color: #fff;
+  text-shadow: 0 0 10px #00ffcc;
+}
+
+/* Animasi muncul */
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(-10px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+/* Responsif */
+@media (max-width: 768px) {
+  .hamburger {
+    top: 15px;
+    right: 15px;
+    font-size: 24px;
+  }
+}
+
+/* SEMBUNYIKAN NAVBAR LAMA SECARA TOTAL */
+nav,
+.navbar,
+.nav,
+.menu,
+.navbar-nav,
+.header-nav,
+.topnav {
+  display: none !important;
+  visibility: hidden !important;
+  opacity: 0 !important;
+  pointer-events: none !important;
+}
+
+/* ====== RESPONSIVE FIXED NAVIGATION ====== */
+
+/* Tombol hamburger selalu muncul */
+.hamburger {
+  position: fixed;
+  top: 18px;
+  right: 22px;
+  font-size: 30px;
+  cursor: pointer;
+  z-index: 2000;
+  color: white;
+  transition: 0.3s ease;
+}
+
+.hamburger:hover {
+  color: #00ffcc;
+  transform: scale(1.1);
+}
+
+/* Menu yang muncul saat hamburger diklik */
+.mobile-menu {
+  display: none;
+  flex-direction: column;
+  align-items: flex-start;
+  background: rgba(10, 10, 10, 0.95);
+  position: fixed;
+  top: 0;
+  right: 0;
+  width: 60%;
+  height: 100%;
+  padding: 100px 25px;
+  z-index: 1500;
+  transform: translateX(100%);
+  transition: transform 0.4s ease-in-out;
+}
+
+.mobile-menu.active {
+  display: flex;
+  transform: translateX(0);
+}
+
+.mobile-menu a {
+  color: #00ffcc;
+  text-decoration: none;
+  font-size: 22px;
+  margin: 18px 0;
+  font-weight: 600;
+  transition: 0.2s;
+}
+
+.mobile-menu a:hover {
+  color: #00ccff;
+  transform: translateX(6px);
+}
+
+/* ===== RESPONSIVE UNTUK HP ===== */
+@media (max-width: 767px) {
+  .hamburger {
+    font-size: 26px;
+    top: 15px;
+    right: 18px;
+  }
+
+  .mobile-menu {
+    width: 75%;
+    padding: 80px 20px;
+  }
+}
+
+/* ===== RESPONSIVE UNTUK TABLET ===== */
+@media (min-width: 768px) and (max-width: 1024px) {
+  .hamburger {
+    font-size: 28px;
+    top: 18px;
+    right: 28px;
+  }
+
+  .mobile-menu {
+    width: 55%;
+    padding: 90px 30px;
+  }
+
+  .dark-mode-toggle {
+    position: fixed;
+    right: 90px;
+    top: 18px;
+  }
+
+  .back-button {
+    position: fixed;
+    left: 30px;
+    top: 18px;
+  }
+}
+
+/* ===== RESPONSIVE UNTUK LAPTOP / DESKTOP ===== */
+@media (min-width: 1025px) {
+  .hamburger {
+    font-size: 30px;
+    top: 20px;
+    right: 35px;
+  }
+
+  .mobile-menu {
+    width: 35%;
+    padding: 100px 40px;
+  }
+
+  .dark-mode-toggle {
+    position: fixed;
+    right: 100px;
+    top: 20px;
+  }
+
+  .back-button {
+    position: fixed;
+    left: 40px;
+    top: 20px;
+  }
+}
+
+/* ===== RESPONSIVE TITLE FIX ===== */
+
+/* HP */
+@media (max-width: 767px) {
+  .navbar h1 {
+    font-size: 15px; /* kecil tapi tetap terbaca */
+    max-width: 65%;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+
+  .navbar {
+    padding: 10px 15px;
+  }
+
+  .toggle-container {
+    transform: scale(0.85);
+    right: 60px;
+    top: 12px;
+  }
+
+  .hamburger {
+    top: 12px;
+    right: 15px;
+  }
+}
+
+/* Tablet */
+@media (min-width: 768px) and (max-width: 1024px) {
+  .navbar h1 {
+    font-size: 17px;
+    max-width: 70%;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+
+  .navbar {
+    padding: 12px 25px;
+  }
+
+  .toggle-container {
+    right: 80px;
+  }
+
+  .hamburger {
+    right: 25px;
+  }
+}
+
+/* Laptop */
+@media (min-width: 1025px) {
+  .navbar h1 {
+    font-size: 20px;
+  }
+}
+
+@media (max-width: 600px) {
+  .hero {
+    font-size: 18px; /* perkecil biar muat */
+    white-space: normal; /* biar bisa pindah baris */
+    word-wrap: break-word; /* pecah kata kalau panjang */
+    text-align: center; /* biar tetap rapi di tengah */
+    line-height: 1.2;
+  }
+}
+
+
+
+  </style>
+</head>
+<body>
+  <canvas id="particles"></canvas>
+
+  <!-- Tombol Kembali -->
+<button class="btn-kembali" onclick="window.history.back()">← Kembali</button>
+<!-- Tombol Hamburger -->
+<div class="hamburger" onclick="toggleMenu()">
+  ☰
+</div>
+
+<!-- Menu Navigasi (disembunyikan awalnya) -->
+<div class="nav-menu" id="navMenu">
+  <a href="index.html">Home</a>
+  <a href="profile.html" class="active">Profile</a>
+</div>
+
+
+
+  <!-- Navbar -->
+  <nav>
+    <a href="index.html">Home</a>
+    <a href="profile.html" class="active">Profile</a>
+    <a></a>
+  </nav>
+
+  <!-- Hero -->
+  <section class="hero">
+    <h1>Profil Anggota Kelas L3</h1>
+  </section>
+
+  <!-- Grid 33 Anggota -->
+  <section class="anggota-grid">
+    <!-- Anggota 1 -->
+    <div class="anggota-card" onclick="showProfile('Tuah Arzu Sahahjahan','Batam','SDN 003 Batu  Aji, MTSN 03 Batam, MAN 1 Batam','23 - 01- 2006','19 Tahun')">
+      <div class="badge">1</div>
+      <img src="arzu.jpg" alt="Foto Anggota 1">
+      <h3> Arzu (Ketua Kelas )</h3>
+    </div>
+
+    <!-- Anggota 2 -->
+    <div class="anggota-card" onclick="showProfile('Jihan','Pangkalan Bun, Kalimantan Tengah','SDN 1 Pasir Panjang, SMPN 1 Pangkalan Bun, SMAN 2 Pangkalan Bun','22 - 03- 2007','18 Tahun')">
+      <div class="badge">2</div>
+      <img src="jihan.jpg" alt="Foto Anggota 2">
+      <h3>jihan ( WAKIL KETUA)</h3>
+    </div>
+
+    <!-- Anggota 3 -->
+    <div class="anggota-card" onclick="showProfile('Raditya Dhery','Lubuk Linggau','SDN 4 Lubuklinggau, SMPN 1 Lubuklinggau, SMAN 1 Lubuklinggau','23 - 09 - 2006','19 Tahun')">
+      <div class="badge">3</div>
+      <img src="radit.jpg" alt="Foto Anggota 3">
+      <h3>Raditya Dery</h3>
+    </div>
+
+    <!-- Anggota 4 -->
+    <div class="anggota-card" onclick="showProfile('Pijar','Medan','SDN 7, SMPN 2, SMAN 6','22 Apr 2006','19 Tahun')">
+      <div class="badge">4</div>
+      <img src="pijar.jpg" alt="Foto Anggota 4">
+      <h3>Pijar</h3>
+    </div>
+
+    <!-- Anggota 5 -->
+    <div class="anggota-card" onclick="showProfile('Rizki','Surabaya','SDN 4, SMPN 3, SMAN 5','06 - 04 - 2008','17 Tahun')">
+      <div class="badge">5</div>
+      <img src="rizki.jpg" alt="Foto Anggota 5">
+      <h3>Rizki</h3>
+    </div>
+
+    <!-- Anggota 6 -->
+    <div class="anggota-card" onclick="showProfile('Ega','Baturaja','SDN 165 OKU, MTS Al ittifaqiah, MA Alittifaqiah','06 - 04 - 2008','17 Tahun')">
+      <div class="badge">6</div>
+      <img src="ega.jpg" alt="Foto Anggota 5">
+      <h3>Ega</h3>
+    </div>
+
+    <!-- Anggota 7 -->
+    <div class="anggota-card" onclick="showProfile('Rizki','Surabaya','SDN 4, SMPN 3, SMAN 5','06 - 04 - 2008','17 Tahun')">
+      <div class="badge">7</div>
+      <img src="rizki.jpg" alt="Foto Anggota 5">
+      <h3>Bolkiah</h3>
+    </div>
+
+    <!-- Anggota 8 -->
+    <div class="anggota-card" onclick="showProfile('Rizki','Surabaya','SDN 4, SMPN 3, SMAN 5','06 - 04 - 2008','17 Tahun')">
+      <div class="badge">8</div>
+      <img src="rizki.jpg" alt="Foto Anggota 5">
+      <h3>Rifa'i</h3>
+    </div>
+
+    <!-- Anggota 9 -->
+    <div class="anggota-card" onclick="showProfile('Muhammad Raffa Al Rauf','Empat Lawang','SDN 02 Pendopo, SMPN 1 Pendopo Barat, MAN 01 Lahat','09 - 02 - 2007','18 Tahun')">
+      <div class="badge">9</div>
+      <img src="rizki.jpg" alt="Foto Anggota 5">
+      <h3>Rafa</h3>
+    </div>
+
+    <!-- Anggota 10 -->
+    <div class="anggota-card" onclick="showProfile('Muhammad Rasyid Ridho','Kayuagung','SDN 1 Ulak Kemang, SMPN 2 Pampangan, SMA Muh 1 Palembang','06 - 09 - 2007','18 Tahun')">
+      <div class="badge">10</div>
+      <img src="pendiri.png" alt="Foto Anggota 5">
+      <h3>Rasyid</h3>
+    </div>
+
+    <!-- Anggota 11 -->
+    <div class="anggota-card" onclick="showProfile('Dhea Aurellia','Lahat','SDN 10 Lahat, SMPN 5 Lahat, SMAN 4 Lahat','03 - 12 - 2007','17 Tahun')">
+      <div class="badge">11</div>
+      <img src="dhea2.jpg" alt="Foto Anggota 5">
+      <h3>Dhea</h3>
+    </div>
+
+    <!-- Anggota 12 -->
+    <div class="anggota-card" onclick="showProfile('Rizki','Surabaya','SDN 4, SMPN 3, SMAN 5','06 - 04 - 2008','17 Tahun')">
+      <div class="badge">12</div>
+      <img src="rizki.jpg" alt="Foto Anggota 5">
+      <h3>Dinda</h3>
+    </div>
+
+    <!-- Anggota 13 -->
+    <div class="anggota-card" onclick="showProfile('Rizki','Surabaya','SDN 4, SMPN 3, SMAN 5','06 - 04 - 2008','17 Tahun')">
+      <div class="badge">13</div>
+      <img src="rizki.jpg" alt="Foto Anggota 5">
+      <h3>Verizka</h3>
+    </div>
+
+    <!-- Anggota 14 -->
+    <div class="anggota-card" onclick="showProfile('Laudia','Bangka','SDN 9 Pemali, SMPN 2 Sungailiat, SMAN 1 Sungailiat','06 - 04 - 2008','17 Tahun')">
+      <div class="badge">14</div>
+      <img src="laudia.jpg" alt="Foto Anggota 5">
+      <h3>Laudia</h3>
+    </div>
+
+    <!-- Anggota 15 -->
+    <div class="anggota-card" onclick="showProfile('Muhammad Rizqi Ajhar','Palembang','SDN 157 Palembang, SMP Muh 4 Palembang, SMK Muh 1 Palembang','31 - 07 - 2007','18 Tahun')">
+      <div class="badge">15</div>
+      <img src="ajhar.jpg" alt="Foto Anggota 5">
+      <h3>Ajhar</h3>
+    </div>
+
+    <!-- Anggota 16 -->
+    <div class="anggota-card" onclick="showProfile('M. Rayyan Alfarabi A','Jambi','SDN 4, SMPN 3, MAN IC Jambi','28 - 06 - 2007','18 Tahun')">
+      <div class="badge">16</div>
+      <img src="rayyan.jpg" alt="Foto Anggota 5">
+      <h3>Rayyan</h3>
+    </div>
+
+    <!-- Anggota 17 -->
+    <div class="anggota-card" onclick="showProfile('M. Farhan Hidayat','Jambi','SDN 4, SMPN 3, MAN IC Jambi','16 - 07 - 2007','18 Tahun')">
+      <div class="badge">17</div>
+      <img src="farhan.jpg" alt="Foto Anggota 5">
+      <h3>Farhan</h3>
+    </div>
+
+    <!-- Anggota 18 -->
+    <div class="anggota-card" onclick="showProfile('M .Noufal Izdihar','Bangka Belitung','SDN 1 Belinyu, SMPN 2 Pangkalpinang, SMAN 3 BANGKA BELITUNG','15 - 08 - 2007','18 Tahun')">
+      <div class="badge">18</div>
+      <img src="noufal.jpg" alt="Foto Anggota 5">
+      <h3>Noufal</h3>
+    </div>
+
+    <!-- Anggota 19 -->
+    <div class="anggota-card" onclick="showProfile('Rizki','Surabaya','SDN 4, SMPN 3, MAN 3 Palembang','06 - 04 - 2008','17 Tahun')">
+      <div class="badge">19</div>
+      <img src="rizki.jpg" alt="Foto Anggota 5">
+      <h3>Rillah</h3>
+    </div>
+
+    <!-- Anggota 20 -->
+    <div class="anggota-card" onclick="showProfile('Alfinandra','Jambi','SDN 4, SMPN 3, SMAN 5','06 - 04 - 2008','17 Tahun')">
+      <div class="badge">20</div>
+      <img src="rizki.jpg" alt="Foto Anggota 5">
+      <h3>Andra</h3>
+    </div>
+
+    <!-- Anggota 21 -->
+    <div class="anggota-card" onclick="showProfile('Rizki','Surabaya','SDN 4, SMPN 3, SMAN 5','06 - 04 - 2008','17 Tahun')">
+      <div class="badge">21</div>
+      <img src="rizki.jpg" alt="Foto Anggota 5">
+      <h3>Sulivan</h3>
+    </div>
+
+    <!-- Anggota 22 -->
+    <div class="anggota-card" onclick="showProfile('Naylah Batubara','Bekasi','SDN 07 Kebalen, SMP Harapan Baru, SMAN 1 Babelan','01 - 06 - 2007','18 Tahun')">
+      <div class="badge">22</div>
+      <img src="nayla.jpg" alt="Foto Anggota 5">
+      <h3>Nayla</h3>
+    </div>
+
+    <!-- Anggota 23 -->
+    <div class="anggota-card" onclick="showProfile('Rizki','Surabaya','SDN 4, SMPN 3, SMAN 5','06 - 04 - 2008','17 Tahun')">
+      <div class="badge">23</div>
+      <img src="rizki.jpg" alt="Foto Anggota 5">
+      <h3>Adit</h3>
+    </div>
+
+    <!-- Anggota 24 -->
+    <div class="anggota-card" onclick="showProfile('Rizki','Surabaya','SDN 4, SMPN 3, SMAN 5','06 - 04 - 2008','17 Tahun')">
+      <div class="badge">24</div>
+      <img src="rizki.jpg" alt="Foto Anggota 5">
+      <h3>Daniel</h3>
+    </div>
+
+    <!-- Anggota 25 -->
+    <div class="anggota-card" onclick="showProfile('Rizki','Surabaya','SDN 4, SMPN 3, SMAN 5','06 - 04 - 2008','17 Tahun')">
+      <div class="badge">25</div>
+      <img src="rizki.jpg" alt="Foto Anggota 5">
+      <h3>Imtiyaz</h3>
+    </div>
+
+    <!-- Anggota 26 -->
+    <div class="anggota-card" onclick="showProfile('Shafin Maulana','Palembang','SDN 7 Palembang, SMPN 8 Palembang, SMAN 1 Palembang','30 - 08 - 2007','18 Tahun')">
+      <div class="badge">26</div>
+      <img src="shafin.jpg" alt="Foto Anggota 5">
+      <h3>Shafin</h3>
+    </div>
+
+    <!-- Anggota 27 -->
+    <div class="anggota-card" onclick="showProfile('Shakilla Marsyah','Palembang','SDN 4, SMPN 3, SMAN 5','06 - 04 - 2008','17 Tahun')">
+      <div class="badge">27</div>
+      <img src="killa.jpg" alt="Foto Anggota 5">
+      <h3>Killa</h3>
+    </div>
+
+    <!-- Anggota 28 -->
+    <div class="anggota-card" onclick="showProfile('Rizki','Surabaya','SDN 4, SMPN 3, SMAN 5','06 - 04 - 2008','17 Tahun')">
+      <div class="badge">28</div>
+      <img src="rizki.jpg" alt="Foto Anggota 5">
+      <h3>Endry</h3>
+    </div>
+
+    <!-- Anggota 29 -->
+    <div class="anggota-card" onclick="showProfile('Rizki','Surabaya','SDN 4, SMPN 3, SMAN 5','06 - 04 - 2008','17 Tahun')">
+      <div class="badge">29</div>
+      <img src="rizki.jpg" alt="Foto Anggota 5">
+      <h3>Nayla</h3>
+    </div>
+
+    <!-- Anggota 30 -->
+    <div class="anggota-card" onclick="showProfile('Rizki','Surabaya','SDN 4, SMPN 3, SMAN 5','06 - 04 - 2008','17 Tahun')">
+      <div class="badge">30</div>
+      <img src="rizki.jpg" alt="Foto Anggota 5">
+      <h3>Rochman</h3>
+    </div>
+
+    <!-- Anggota 31 -->
+    <div class="anggota-card" onclick="showProfile('Chanda','Palembang','SD Islam Az-Zahra, SMP Islam Az-Zhara 1, SMA Kusuma Bangsa','06 - 04 - 2008','17 Tahun')">
+      <div class="badge">31</div>
+      <img src="Chanda.jpg" alt="Foto Anggota 5">
+      <h3>Chanda</h3>
+    </div>
+
+    <!-- Anggota 32 -->
+    <div class="anggota-card" onclick="showProfile('Rizki','Surabaya','SDN 4, SMPN 3, SMAN 5','06 - 04 - 2008','17 Tahun')">
+      <div class="badge">32</div>
+      <img src="arya.jpg" alt="Foto Anggota 5">
+      <h3>Arya</h3>
+    </div>
+
+
+    <!-- lanjutkan pola ini sampai 33 -->
+  </section>
+
+  <!-- Modal -->
+  <div id="profileModal" class="modal">
+    <div class="modal-content">
+      <span class="close" onclick="document.getElementById('profileModal').style.display='none'">&times;</span>
+      <h2 id="modalNama"></h2>
+      <p><b>Asal:</b> <span id="modalAsal"></span></p>
+      <p><b>Alumni:</b> <span id="modalAlumni"></span></p>
+      <p><b>Tanggal Lahir:</b> <span id="modalLahir"></span></p>
+      <p><b>Umur:</b> <span id="modalUmur"></span></p>
+    </div>
+  </div>
+
+  <script>
+
+    // Efek delay sebelum animasi ketik dimulai
+window.addEventListener("load", () => {
+  const heroText = document.querySelector(".hero h1");
+  heroText.style.animation = "typing 3s steps(30, end) forwards, blink 0.75s step-end infinite";
+});
+
+
+    function showProfile(nama, asal, alumni, lahir, umur) {
+      document.getElementById('modalNama').textContent = nama;
+      document.getElementById('modalAsal').textContent = asal;
+      document.getElementById('modalAlumni').textContent = alumni;
+      document.getElementById('modalLahir').textContent = lahir;
+      document.getElementById('modalUmur').textContent = umur;
+      document.getElementById('profileModal').style.display = 'flex';
+    }
+
+    // Partikel animasi background
+    const canvas = document.getElementById("particles");
+    const ctx = canvas.getContext("2d");
+    canvas.width = window.innerWidth;
+    canvas.height = window.innerHeight;
+
+    let particlesArray = [];
+    const numberOfParticles = 100;
+
+    class Particle {
+      constructor() {
+        this.x = Math.random() * canvas.width;
+        this.y = Math.random() * canvas.height;
+        this.size = Math.random() * 3 + 1;
+        this.speedX = Math.random() * 1 - 0.5;
+        this.speedY = Math.random() * 1 - 0.5;
+      }
+      update() {
+        this.x += this.speedX;
+        this.y += this.speedY;
+        if(this.x < 0 || this.x > canvas.width) this.speedX *= -1;
+        if(this.y < 0 || this.y > canvas.height) this.speedY *= -1;
+      }
+      draw() {
+        ctx.fillStyle = "#00ffcc";
+        ctx.beginPath();
+        ctx.arc(this.x, this.y, this.size, 0, Math.PI * 2);
+        ctx.fill();
+      }
+    }
+
+    function init() {
+      particlesArray = [];
+      for(let i = 0; i < numberOfParticles; i++) {
+        particlesArray.push(new Particle());
+      }
+    }
+
+    function animate() {
+      ctx.clearRect(0,0,canvas.width,canvas.height);
+      particlesArray.forEach(p => {
+        p.update();
+        p.draw();
+      });
+      requestAnimationFrame(animate);
+    }
+
+    // Parallax saat scroll
+window.addEventListener("scroll", () => {
+  const hero = document.querySelector(".hero");
+  const scrollY = window.scrollY;
+  hero.style.backgroundPositionY = `${scrollY * 0.1}px`;
+});
+
+
+    init();
+    animate();
+
+    window.addEventListener("resize", () => {
+      canvas.width = window.innerWidth;
+      canvas.height = window.innerHeight;
+      init();
+    });
+
+    // --- Efek kartu muncul bergantian dari kiri dan kanan ---
+const cards = document.querySelectorAll('.anggota-card');
+
+cards.forEach((card, i) => {
+  // Tambahkan arah bergantian
+  if (i % 2 === 0) {
+    card.classList.add('left');
+  }
+
+  // Delay animasi muncul
+  card.style.transitionDelay = `${i * 0.1}s`;
+});
+
+// Observer: aktifkan animasi saat kartu terlihat
+const observer = new IntersectionObserver(entries => {
+  entries.forEach(entry => {
+    if (entry.isIntersecting) {
+      entry.target.classList.add('show');
+    }
+  });
+}, { threshold: 0.1 });
+
+cards.forEach(card => observer.observe(card));
+
+// Toggle menu saat hamburger diklik
+function toggleMenu() {
+  const menu = document.getElementById("navMenu");
+  menu.style.display = menu.style.display === "flex" ? "none" : "flex";
+}
+
+// Tutup menu kalau klik di luar
+window.addEventListener("click", (e) => {
+  const menu = document.getElementById("navMenu");
+  const burger = document.querySelector(".hamburger");
+  if (!menu.contains(e.target) && !burger.contains(e.target)) {
+    menu.style.display = "none";
+  }
+});
+  </script>
+</body>
+</html>

@@ -1,0 +1,371 @@
+<!doctype html>
+<html lang="id">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1" />
+<title>Flappy Bird Mini</title>
+<style>
+  :root{--bg:#70c5ce;--bird:#ffdd57;--pipe:#4ec0a6;--ground:#DEB887}
+  html,body{height:100%;margin:0}
+  body{display:flex;align-items:center;justify-content:center;background:var(--bg);font-family:system-ui,-apple-system,Segoe UI,Roboto,"Helvetica Neue",Arial}
+  #gameWrap{width:360px;max-width:90vw;background:linear-gradient(#cfeff2,#a6e6ea);box-shadow:0 6px 20px rgba(0,0,0,.15);border-radius:10px;overflow:hidden}
+  canvas{display:block;width:100%;height:auto;background:linear-gradient(#70c5ce,#6ec8d4)}
+  #hud{display:flex;justify-content:space-between;padding:10px 12px;background:rgba(255,255,255,.05);align-items:center}
+  #score{font-weight:700;font-size:18px;color:#033;letter-spacing:1px}
+  #best{font-size:13px;color:#045}
+  #overlay{position:absolute;left:0;right:0;top:0;bottom:0;display:flex;align-items:center;justify-content:center;pointer-events:none}
+  .panel{background:rgba(255,255,255,.95);padding:14px;border-radius:8px;text-align:center;box-shadow:0 6px 20px rgba(0,0,0,.12)}
+  .btn{display:inline-block;margin-top:8px;background:#4ec0a6;color:#012;border-radius:6px;padding:8px 12px;font-weight:700;cursor:pointer;user-select:none}
+  small{color:#666;display:block;margin-top:6px}
+  /* responsive spacing */
+  @media (min-width:420px){#gameWrap{width:420px}}
+
+  .back-btn {
+  position: fixed;
+  bottom: 20px;      /* pojok bawah */
+  right: 20px;       /* pojok kanan */
+  background: rgba(255,255,255,0.08);
+  border: 1px solid rgba(255,255,255,0.2);
+  color: whitesmoke;
+  backdrop-filter: blur(8px);
+  padding: 10px 18px;
+  border-radius: 999px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  z-index: 100;
+}
+.back-btn:hover {
+  background: var(--accent);
+  color: #001;
+  transform: translateY(-2px);
+  box-shadow: 0 8px 24px greenyellow;
+}
+</style>
+</head>
+<body>
+
+  <button class="back-btn" href ="index.html" onclick="history.back()">← Kembali</button>
+
+<div id="gameWrap" style="position:relative">
+  <div id="hud">
+    <div id="score">Score: 0</div>
+    <div id="best">Best: 0</div>
+  </div>
+  <canvas id="game" width="360" height="640"></canvas>
+
+  <!-- simple overlay for messages -->
+  <div id="overlay" style="pointer-events:none"></div>
+</div>
+
+<script>
+/*
+ Flappy Bird Mini
+ Controls: click / tap / Spacebar to flap
+ Features: physics, pipes, score, best-score (localStorage), restart
+ No external assets — drawn with canvas shapes
+*/
+
+const canvas = document.getElementById('game');
+const ctx = canvas.getContext('2d');
+let W = canvas.width, H = canvas.height;
+
+// Scale to CSS size but keep internal resolution consistent
+function resizeCanvas() {
+  const ratio = window.devicePixelRatio || 1;
+  const styleW = canvas.clientWidth;
+  canvas.width = Math.round(styleW * ratio);
+  canvas.height = Math.round((styleW * 640/360) * ratio);
+  W = canvas.width; H = canvas.height;
+  ctx.setTransform(ratio,0,0,ratio,0,0); // draw in CSS pixels
+}
+window.addEventListener('resize', resizeCanvas);
+resizeCanvas();
+
+// Game variables
+let bird = {};
+let pipes = [];
+let frame = 0;
+let score = 0;
+let best = parseInt(localStorage.getItem('flappy_best') || '0',10);
+let running = false;
+let gameOver = false;
+
+// Config (tweakable)
+const GRAVITY = 0.45;
+const FLAP = -8;        // negative = up
+const BIRD_RADIUS = 14; // visual radius in CSS pixels
+const PIPE_WIDTH = 60;
+const PIPE_GAP = 160;   // gap height in CSS pixels
+const PIPE_INTERVAL = 110; // frames between pipes (lower => more frequent)
+const PIPE_SPEED = 2.4; // px per frame
+const GROUND_H = 80;    // ground height
+
+// HUD refs
+const scoreEl = document.getElementById('score');
+const bestEl = document.getElementById('best');
+const overlay = document.getElementById('overlay');
+bestEl.textContent = 'Best: ' + best;
+
+// Initialize/reset game
+function reset() {
+  bird = {
+    x: 80,
+    y: H / (devicePixelRatio||1) / 2,
+    vy: 0,
+    rotation: 0
+  };
+  pipes = [];
+  frame = 0;
+  score = 0;
+  running = true;
+  gameOver = false;
+  scoreEl.textContent = 'Score: 0';
+  overlay.innerHTML = '';
+}
+
+// Utility: draw rounded rect
+function roundRect(x,y,w,h,r,fill){
+  ctx.beginPath();
+  ctx.moveTo(x+r,y);
+  ctx.arcTo(x+w,y,x+w,y+h,r);
+  ctx.arcTo(x+w,y+h,x,y+h,r);
+  ctx.arcTo(x,y+h,x,y,r);
+  ctx.arcTo(x,y,x+w,y,r);
+  ctx.closePath();
+  if(fill) ctx.fill();
+  else ctx.stroke();
+}
+
+// Spawn a new pipe pair
+function spawnPipe(){
+  // vertical space for pipe gap random within reasonable bounds
+  const minY = 60;
+  const maxY = ( (H/(devicePixelRatio||1)) - GROUND_H - PIPE_GAP - 60 );
+  const gapY = minY + Math.random() * Math.max(0, maxY - minY);
+  pipes.push({
+    x: (W/(devicePixelRatio||1)) + PIPE_WIDTH,
+    gapY: Math.round(gapY),
+    passed: false
+  });
+}
+
+// Game loop
+function update(){
+  if(!running) return;
+  frame++;
+
+  // Physics
+  bird.vy += GRAVITY;
+  bird.y += bird.vy;
+  bird.rotation = Math.max(-0.6, Math.min(1.2, bird.vy * 0.06));
+
+  // Pipe spawn
+  if(frame % PIPE_INTERVAL === 0) spawnPipe();
+
+  // Move pipes
+  for(let i=pipes.length-1;i>=0;i--){
+    pipes[i].x -= PIPE_SPEED;
+    // scoring: when pipe passes bird x
+    if(!pipes[i].passed && pipes[i].x + PIPE_WIDTH < bird.x){
+      pipes[i].passed = true;
+      score++;
+      scoreEl.textContent = 'Score: ' + score;
+      if(score > best){
+        best = score;
+        localStorage.setItem('flappy_best', String(best));
+        bestEl.textContent = 'Best: ' + best;
+      }
+    }
+    // remove offscreen
+    if(pipes[i].x + PIPE_WIDTH < -50) pipes.splice(i,1);
+  }
+
+  // Ground collision
+  const groundY = (H/(devicePixelRatio||1)) - GROUND_H;
+  if(bird.y + BIRD_RADIUS > groundY){
+    bird.y = groundY - BIRD_RADIUS;
+    endGame();
+  }
+
+  // Ceiling
+  if(bird.y - BIRD_RADIUS < 0){
+    bird.y = BIRD_RADIUS;
+    bird.vy = 0;
+  }
+
+  // Collisions with pipes (AABB approximations)
+  for(const p of pipes){
+    const px = p.x, pyTop = 0, pyBottom = p.gapY + PIPE_GAP;
+    // top pipe rect: x->px..px+PIPE_WIDTH, y->0..p.gapY
+    // bottom pipe rect: x->px..px+PIPE_WIDTH, y->pyBottom..groundY
+    // approximate bird as circle
+    if(circleRectCollide(bird.x, bird.y, BIRD_RADIUS, px, pyTop, PIPE_WIDTH, p.gapY)
+      || circleRectCollide(bird.x, bird.y, BIRD_RADIUS, px, pyBottom, PIPE_WIDTH, groundY - pyBottom)){
+        endGame();
+    }
+  }
+
+  draw();
+  if(!gameOver) requestAnimationFrame(update);
+}
+
+// Collision: circle vs rect
+function circleRectCollide(cx,cy,r, rx,ry,rw,rh){
+  // find closest point to circle center within rect
+  const closestX = clamp(cx, rx, rx + rw);
+  const closestY = clamp(cy, ry, ry + rh);
+  const dx = cx - closestX;
+  const dy = cy - closestY;
+  return (dx*dx + dy*dy) < (r*r);
+}
+function clamp(v,a,b){ return Math.max(a,Math.min(b,v)); }
+
+// Draw everything
+function draw(){
+  // clear
+  ctx.clearRect(0,0,canvas.width,canvas.height);
+
+  const scale = devicePixelRatio || 1;
+  const CW = W/scale, CH = H/scale;
+
+  // background sky gradient
+  const g = ctx.createLinearGradient(0,0,0,CH);
+  g.addColorStop(0,'#70c5ce'); g.addColorStop(1,'#6ec8d4');
+  ctx.fillStyle = g;
+  ctx.fillRect(0,0,CW,CH);
+
+  // pipes
+  for(const p of pipes){
+    const x = p.x, gapY = p.gapY;
+    // top pipe (green)
+    ctx.fillStyle = '#4ec0a6';
+    ctx.fillRect(x, 0, PIPE_WIDTH, gapY);
+    // bottom pipe
+    ctx.fillRect(x, gapY + PIPE_GAP, PIPE_WIDTH, CH - GROUND_H - (gapY + PIPE_GAP));
+    // pipe caps (round)
+    ctx.fillStyle = '#3da48b';
+    ctx.fillRect(x-4, gapY-8, PIPE_WIDTH+8, 8);
+    ctx.fillRect(x-4, gapY+PIPE_GAP, PIPE_WIDTH+8, 8);
+  }
+
+  // ground
+  ctx.fillStyle = '#DEB887';
+  ctx.fillRect(0, CH - GROUND_H, CW, GROUND_H);
+  // ground texture stripes
+  for(let gx=0; gx<CW; gx += 20){
+    ctx.fillStyle = 'rgba(0,0,0,0.03)';
+    ctx.fillRect(gx, CH - GROUND_H, 10, 6);
+  }
+
+  // bird (simple circle + wing)
+  ctx.save();
+  ctx.translate(bird.x, bird.y);
+  ctx.rotate(bird.rotation);
+  // body
+  ctx.fillStyle = '#ffdd57';
+  ctx.beginPath(); ctx.arc(0,0,BIRD_RADIUS,0,Math.PI*2); ctx.fill();
+  // eye
+  ctx.fillStyle = '#222';
+  ctx.beginPath(); ctx.arc(6,-4,3,0,Math.PI*2); ctx.fill();
+  // wing
+  ctx.fillStyle = '#f0c94a';
+  ctx.beginPath();
+  ctx.ellipse(-2,6,8,4, -0.8, 0, Math.PI*2);
+  ctx.fill();
+  ctx.restore();
+
+  // optional: score big center when paused/gameover
+  if(gameOver){
+    // dark overlay
+    ctx.fillStyle = 'rgba(0,0,0,0.25)';
+    ctx.fillRect(0,0,CW,CH);
+  }
+}
+
+// handle flap
+function flap(){
+  if(gameOver) return;
+  bird.vy = FLAP;
+  // small impulse if not started
+  if(!running) {
+    reset(); update();
+  }
+}
+
+// end game
+function endGame(){
+  if(gameOver) return;
+  gameOver = true;
+  running = false;
+  showGameOverPanel();
+}
+
+// show overlay panel
+function showGameOverPanel(){
+  overlay.style.pointerEvents = 'auto';
+  overlay.innerHTML = `
+    <div class="panel" style="min-width:200px">
+      <div style="font-weight:800;font-size:20px">Game Over</div>
+      <div style="margin-top:8px">Score: <strong>${score}</strong></div>
+      <div style="margin-top:4px">Best: <strong>${best}</strong></div>
+      <div class="btn" id="restartBtn">Main Lagi</div>
+      <small>Tekan Space / Klik / Ketuk untuk lompat</small>
+    </div>
+  `;
+  document.getElementById('restartBtn').addEventListener('click', ()=> {
+    overlay.style.pointerEvents = 'none';
+    reset();
+    update();
+  });
+}
+
+// input handlers
+window.addEventListener('keydown', e => {
+  if(e.code === 'Space') {
+    e.preventDefault();
+    if(gameOver){ overlay.querySelector('#restartBtn')?.click(); }
+    else flap();
+  }
+});
+canvas.addEventListener('mousedown', e => {
+  if(gameOver) overlay.querySelector('#restartBtn')?.click();
+  else flap();
+});
+canvas.addEventListener('touchstart', e => {
+  e.preventDefault();
+  if(gameOver) overlay.querySelector('#restartBtn')?.click();
+  else flap();
+}, {passive:false});
+
+// start initially paused with instructions panel
+function showStartPanel(){
+  overlay.style.pointerEvents = 'auto';
+  overlay.innerHTML = `
+    <div class="panel" style="min-width:220px">
+      <div style="font-weight:800;font-size:20px">Flappy Mini</div>
+      <div style="margin-top:8px">Tekan Space / Klik / Ketuk untuk lompat</div>
+      <div style="margin-top:8px">Tujuan: Lewati pipa sebanyak mungkin</div>
+      <div class="btn" id="startBtn">Mulai</div>
+      <small style="margin-top:6px">Best: ${best}</small>
+    </div>
+  `;
+  document.getElementById('startBtn').addEventListener('click', ()=> {
+    overlay.style.pointerEvents = 'none';
+    reset();
+    update();
+  });
+}
+
+showStartPanel();
+
+// optional: friendly resize handler to keep internal math OK
+window.addEventListener('load', ()=> {
+  // ensure bird x uses CSS pixels scale
+  bird.x = 80;
+  resizeCanvas();
+});
+</script>
+
+</body>
+</html>

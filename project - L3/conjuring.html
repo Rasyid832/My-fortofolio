@@ -1,0 +1,213 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>The Conjuring — Detail Film</title>
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;700&display=swap');
+
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      font-family: 'Inter', sans-serif;
+      background: #071021;
+      color: #f5f7fb;
+      overflow-x: hidden;
+      position: relative;
+      padding: 40px 20px;
+    }
+
+    canvas#bgCanvas {
+      position: fixed;
+      top: 0; left: 0;
+      width: 100%; height: 100%;
+      z-index: -1;
+    }
+
+    .container {
+      max-width: 900px;
+      width: 100%;
+      background: rgba(0, 0, 0, 0.6);
+      backdrop-filter: blur(12px);
+      border-radius: 20px;
+      padding: 30px;
+      box-shadow: 0 10px 40px rgba(0,0,0,0.7);
+      margin: auto;
+      position: relative;
+    }
+
+    .header {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      text-align: center;
+      margin-bottom: 30px;
+    }
+
+    .header h1 {
+      font-size: 2.5rem;
+      color: #00ffd1;
+      margin-bottom: 10px;
+      letter-spacing: 1px;
+    }
+
+    .meta { font-size: 14px; color: rgba(255,255,255,0.7); margin-bottom: 15px; }
+
+    .poster {
+      width: 100%;
+      border-radius: 16px;
+      margin: 25px 0;
+      box-shadow: 0 8px 30px rgba(0,0,0,0.6);
+      transition: transform 0.3s ease;
+    }
+
+    .poster:hover { transform: scale(1.03); }
+
+    .info, .plot {
+      font-size: 16px;
+      line-height: 1.6;
+      color: #e0e0e0;
+      margin-bottom: 20px;
+    }
+
+    .plot { background: rgba(255,255,255,0.05); padding: 15px; border-radius: 12px; border-left: 3px solid #00ffd1; }
+
+    .scene-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+      gap: 12px;
+      margin-bottom: 25px;
+    }
+
+    .info{
+        justify-content: center;
+        align-items: center;
+        text-emphasis: center;
+        padding: 5px;
+        font-family: Cambria, Cochin, Georgia, Times, 'Times New Roman', serif;
+    }
+
+    .scene-grid img {
+      width: 100%;
+      border-radius: 12px;
+      object-fit: cover;
+      cursor: pointer;
+      transition: transform 0.3s ease;
+    }
+
+    .scene-grid img:hover { transform: scale(1.05); }
+
+    .trailer { position: relative; padding-bottom: 56.25%; height: 0; overflow: hidden; border-radius: 16px; margin-bottom: 30px; box-shadow: 0 6px 20px rgba(0,0,0,0.6); }
+
+    .trailer iframe { position: absolute; top:0; left:0; width:100%; height:100%; border:none; border-radius:16px; }
+
+    /* Tombol Kembali di paling bawah, kiri */
+    .back-btn {
+      display: inline-block;
+      padding: 12px 25px;
+      background: linear-gradient(90deg, #ff4c29, #ff6b4a);
+      color: #fff;
+      font-weight: 700;
+      text-decoration: none;
+      border-radius: 12px;
+      transition: all 0.3s ease;
+      text-align: center;
+      margin-top: 30px;
+      box-shadow: 0 4px 15px rgba(255,70,50,0.4);
+    }
+
+    .back-btn:hover {
+      background: linear-gradient(90deg, #ff6b4a, #ff4c29);
+      transform: translateY(-2px);
+      box-shadow: 0 8px 25px rgba(255,70,50,0.6);
+    }
+
+    @media (max-width:600px){
+      .header h1 { font-size: 2rem; }
+      .info, .plot { font-size: 15px; }
+      .back-btn { width: 100%; }
+      .scene-grid { grid-template-columns: repeat(auto-fit,minmax(100px,1fr)); }
+    }
+  </style>
+</head>
+<body>
+  <canvas id="bgCanvas"></canvas>
+
+  <div class="container">
+    <div class="header">
+      <h1>The Conjuring</h1>
+      <div class="meta">Drama, Horor • Tahun 2025 • Rating ★ 8.2</div>
+    </div>
+
+    <img src="conjuring.jpeg" alt="Poster The Conjuring" class="poster">
+
+    <div class="info">
+      <strong>Durasi:</strong> 1 jam 52 menit<br>
+      <strong>Sutradara:</strong> James Wan<br>
+      <strong>Pemeran:</strong> Vera Farmiga, Patrick Wilson, Lili Taylor
+    </div>
+
+    <div class="plot">
+      <strong>Alur Cerita:</strong> Sebuah keluarga pindah ke rumah tua yang terlihat sempurna, namun segera mereka merasakan kehadiran supranatural yang mengancam. Ed dan Lorraine Warren dipanggil untuk menyelidiki, menghadapi kekuatan gelap yang menguji keberanian dan iman mereka, serta mengungkap misteri di balik teror yang menghantui rumah tersebut.
+    </div>
+
+    <h2 style="color:grey;margin-bottom:12px;justify-content: center;align-items: center;display: flex;padding: 7px;">Scene Highlight</h2>
+    <div class="scene-grid">
+      <img src="scene conjuring1" alt="Scene 1">
+      <img src="scene conjuring2.jpg" alt="Scene 2">
+      <img src="scene conjuring3" alt="Scene 3">
+      <img src="scene conjuring4.jpg" alt="Scene 4">
+    </div>
+
+    <h2 style="color:grey;margin-bottom:12px;display: flex;justify-content: center;align-items: center;padding: 11px;">Trailer</h2>
+    <div class="trailer">
+      <iframe src="https://www.youtube.com/embed/bMgfsdYoEEo?si" allowfullscreen title="Trailer The Conjuring"></iframe>
+    </div>
+
+    <!-- Tombol Kembali -->
+    <a href="film.html" class="back-btn">← Kembali ke Daftar Film</a>
+  </div>
+
+  <script>
+    // ===== Efek JS Background =====
+    const canvas = document.getElementById('bgCanvas');
+    const ctx = canvas.getContext('2d');
+    let w = canvas.width = window.innerWidth;
+    let h = canvas.height = window.innerHeight;
+
+    const particles = [];
+    for(let i=0;i<100;i++){
+      particles.push({
+        x: Math.random()*w,
+        y: Math.random()*h,
+        r: Math.random()*2+1,
+        dx: (Math.random()-0.5)*0.5,
+        dy: (Math.random()-0.5)*0.5,
+        alpha: Math.random()*0.5+0.2
+      });
+    }
+
+    function animate(){
+      ctx.clearRect(0,0,w,h);
+      for(let p of particles){
+        ctx.beginPath();
+        ctx.arc(p.x,p.y,p.r,0,Math.PI*2);
+        ctx.fillStyle = `rgba(0,255,255,${p.alpha})`;
+        ctx.fill();
+        p.x += p.dx;
+        p.y += p.dy;
+        if(p.x<0) p.x=w; if(p.x>w) p.x=0;
+        if(p.y<0) p.y=h; if(p.y>h) p.y=0;
+      }
+      requestAnimationFrame(animate);
+    }
+    animate();
+
+    window.addEventListener('resize',()=>{
+      w=canvas.width=window.innerWidth;
+      h=canvas.height=window.innerHeight;
+    });
+  </script>
+</body>
+</html>

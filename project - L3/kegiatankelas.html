@@ -1,0 +1,911 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1" />
+<title>Kegiatan Kelas L3 — Interaktif</title>
+<link rel="preconnect" href="https://fonts.gstatic.com">
+<style>
+  :root{
+    --bg-1:#03040a;
+    --bg-2:#071029;
+    --card-bg: rgba(255,255,255,0.04);
+    --accent1: #00e5ff;
+    --accent2: #8aff7a;
+    --muted: rgba(255,255,255,0.75);
+    --glass: rgba(255,255,255,0.03);
+    --card-w: 320px;
+  }
+
+  /* --- Basic reset --- */
+  *{box-sizing:border-box}
+  html,body{height:100%}
+  body{
+    margin:0;
+    font-family: Inter, ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial;
+    background: linear-gradient(180deg,var(--bg-1),var(--bg-2));
+    color:var(--muted);
+    -webkit-font-smoothing:antialiased;
+    -moz-osx-font-smoothing:grayscale;
+    overflow-x:hidden;
+  }
+
+  /* Canvas full-screen background */
+  #bg {
+    position: fixed;
+    inset: 0;
+    z-index: 0;
+    pointer-events: none;
+  }
+
+  /* Page shell */
+  .wrap{
+    position: relative;
+    z-index: 10;
+    max-width:1200px;
+    margin: 0 auto;
+    padding: 48px 20px 120px;
+  }
+
+  /* Header */
+  header{
+    display:flex;
+    gap:20px;
+    align-items:center;
+    justify-content:space-between;
+    margin-bottom:30px;
+  }
+  header .title {
+    display:flex;
+    gap:12px;
+    align-items:center;
+  }
+  header h1{
+    font-size: clamp(20px, 3.6vw, 32px);
+    margin:0;
+    color:var(--accent1);
+    letter-spacing: 0.2px;
+    text-shadow: 0 6px 30px rgba(0,229,255,0.08);
+  }
+  header p { margin:0; color: rgba(255,255,255,0.6); font-size:14px }
+
+  /* Controls row (small) */
+  .controls { display:flex; gap:12px; align-items:center; }
+  .chip{
+    background:var(--glass);
+    padding:8px 12px;
+    border-radius:999px;
+    font-size:13px;
+    color:var(--muted);
+    border:1px solid rgba(255,255,255,0.04);
+    backdrop-filter: blur(6px);
+  }
+
+  /* Section: cards area */
+  .cards-viewport{
+    perspective: 1200px; /* for 3D hover perspective */
+    margin-top:20px;
+  }
+
+  .cards {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+    gap: 28px;
+    align-items: start;
+  }
+
+  /* Card: glass + multiple decorative borders */
+  .card {
+    --tiltX: 0deg;
+    --tiltY: 0deg;
+    width:100%;
+    max-width: var(--card-w);
+    margin: 0 auto;
+    background: linear-gradient(180deg, rgba(255,255,255,0.03), rgba(255,255,255,0.02));
+    border-radius: 16px;
+    padding: 14px;
+    position: relative;
+    overflow: visible;
+    transform-style: preserve-3d;
+    transition: transform 380ms cubic-bezier(.18,.9,.2,1), box-shadow 300ms;
+    box-shadow: 0 6px 30px rgba(0,0,0,0.6), inset 0 1px 0 rgba(255,255,255,0.02);
+    border: 1px solid rgba(0,255,255,0.06);
+    cursor: pointer;
+    min-height: 300px;
+  }
+
+  /* multiple border layers implemented as pseudo elements */
+  .card::before,
+  .card::after{
+    content: "";
+    position: absolute;
+    inset: 8px;
+    border-radius: 12px;
+    pointer-events: none;
+    mix-blend-mode: screen;
+    transition: transform 450ms;
+  }
+  .card::before{
+    border: 2px dashed rgba(0,255,255,0.06);
+    transform: rotate(-1.5deg) translateZ(-1px);
+    filter: blur(6px);
+  }
+  .card::after{
+    border: 2px solid rgba(138,255,122,0.06);
+    inset: 18px;
+    transform: rotate(2.1deg) translateZ(-2px);
+    opacity:0.9;
+  }
+
+  /* decorative floating frames */
+  .frame-dot{
+    position:absolute;
+    width:64px;height:64px;border-radius:10px;
+    border:1px solid rgba(0,255,255,0.08);
+    left:-28px; top:-18px;
+    transform: rotate(8deg);
+    background: linear-gradient(135deg, rgba(0,255,255,0.02), transparent);
+    box-shadow: 0 6px 30px rgba(0,255,255,0.03);
+    animation: floatA 6s ease-in-out infinite;
+    pointer-events:none;
+  }
+  .frame-line{
+    position:absolute;
+    height:2px;width:80px;
+    right:-40px; bottom:30px;
+    background: linear-gradient(90deg, transparent, rgba(138,255,122,0.12), transparent);
+    transform: rotate(-12deg);
+    animation: floatB 5.5s ease-in-out infinite;
+    pointer-events:none;
+  }
+
+  @keyframes floatA {
+    0%{ transform: translateY(0) rotate(8deg)}
+    50%{ transform: translateY(-8px) rotate(6deg) }
+    100%{ transform: translateY(0) rotate(8deg) }
+  }
+  @keyframes floatB {
+    0%{ transform: translateY(0) rotate(-12deg)}
+    50%{ transform: translateY(6px) rotate(-10deg) }
+    100%{ transform: translateY(0) rotate(-12deg) }
+  }
+
+  /* inner content */
+  .card .media{
+    width:100%;
+    height:160px;
+    border-radius:12px;
+    overflow:hidden;
+    position:relative;
+    border:1px solid rgba(255,255,255,0.02);
+  }
+  .card .media img{
+    width:100%;height:100%;object-fit:cover;display:block; transform-origin:center center;
+    transition: transform 600ms cubic-bezier(.2,.9,.3,1);
+    will-change: transform;
+  }
+
+  .card .info{
+    padding:12px 4px 8px;
+  }
+  .card h3{ margin:0 0 6px; font-size:18px; color:var(--accent2)}
+  .card p{ margin:0; font-size:13px; color:rgba(255,255,255,0.78) }
+
+  /* reveal animation */
+  .card.hide { opacity:0; transform: translateY(40px) scale(.98) }
+  .card.show { opacity:1; transform: translateZ(0) translateY(0) scale(1) }
+
+  /* hover 3D */
+  .card:hover{
+    transform: translateZ(16px) rotateX(var(--tiltX)) rotateY(var(--tiltY));
+    box-shadow: 0 20px 50px rgba(0,0,0,0.7), 0 0 40px rgba(0,229,255,0.06);
+  }
+  .card:hover .media img{ transform: scale(1.08) translateY(-4px) }
+
+  /* fancy border shapes around card (as decorative absolute elements) */
+  .card .b1, .card .b2, .card .b3 {
+    position:absolute; pointer-events:none;
+  }
+  .card .b1 { width:36px;height:36px;border-radius:8px;border:2px solid rgba(0,255,255,0.09); left:-18px; bottom:20px; transform: rotate(-12deg); opacity:0.9 }
+  .card .b2 { width:88px;height:14px;border-radius:6px;border:1px solid rgba(138,255,122,0.06); right:-28px; top:10px; transform: rotate(12deg); }
+  .card .b3 { width:120px;height:120px;border-radius:12px;border:1px dashed rgba(0,255,255,0.03); right:-50px; bottom:-40px; transform: rotate(12deg); opacity:0.5 }
+
+  /* small ribbon tag */
+  .tag {
+    position:absolute; left:12px; top:12px;
+    background: linear-gradient(90deg,var(--accent1),var(--accent2));
+    color:#002; font-weight:600;padding:6px 10px;border-radius:8px;font-size:12px;
+    box-shadow: 0 6px 18px rgba(0,229,255,0.06);
+  }
+
+  /* layout tweaks for many cards looking non-linear: apply stagger transform */
+  .cards > .card:nth-child(odd){ transform: translateY(8px) rotate(-1deg) }
+  .cards > .card:nth-child(even){ transform: translateY(-6px) rotate(2deg) }
+
+  @media (max-width: 980px){
+    .cards{ grid-template-columns: repeat(auto-fit,minmax(220px,1fr)); gap:18px }
+    .card{ max-width: 100% }
+    .frame-dot{ display:none }
+  }
+
+  @media (max-width: 560px){
+    .cards{ grid-template-columns: 1fr }
+    header{ text-align:left; gap:8px; flex-direction:column }
+    .controls{ justify-content:flex-start; width:100% }
+  }
+
+  /* small helper: focus/keyboard */
+  .card:focus{ outline: 2px solid rgba(0,255,255,0.12) ; outline-offset:4px }
+
+  /* === Efek tombol tema === */
+.theme-buttons {
+  position: fixed;
+  top: 20px;
+  right: 20px;
+  z-index: 100;
+  display: flex;
+  gap: 10px;
+}
+.theme-buttons button {
+  padding: 8px 12px;
+  border: none;
+  border-radius: 8px;
+  background: var(--accent-color, #444);
+  color: white;
+  cursor: pointer;
+  font-weight: bold;
+  transition: 0.3s;
+}
+.theme-buttons button:hover {
+  transform: scale(1.1);
+}
+
+/* === Kanvas partikel === */
+#particles {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  z-index: -1;
+}
+
+/* === Warna tema === */
+body.dark-mode {
+  --particle-color: #ffffff55;
+  background: #0a0a0a;
+  color: #fff;
+}
+body.neon-mode {
+  --particle-color: #00ffffaa;
+  background: radial-gradient(circle, #001f3f, #000);
+  color: #0ff;
+}
+body:not(.dark-mode):not(.neon-mode) {
+  --particle-color: #00000033;
+  background: #f5f5f5;
+  color: #000;
+}
+
+/* === Partikel Background === */
+#particles {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  z-index: -1;
+  background: transparent;
+}
+
+/* === Tombol Tema === */
+.theme-buttons {
+  position: fixed;
+  top: 10px;
+  right: 15px;
+  display: flex;
+  gap: 6px;
+  z-index: 1000;
+}
+
+.theme-buttons button {
+  background: rgba(255,255,255,0.2);
+  border: 1px solid rgba(255,255,255,0.4);
+  color: white;
+  padding: 5px 10px;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: 0.3s;
+}
+
+.theme-buttons button:hover {
+  background: rgba(255,255,255,0.4);
+}
+
+/* === Mode Tema === */
+body {
+  --particle-color: rgba(255,255,255,0.2);
+  background: #ffffff;
+  color: #000;
+  transition: background 0.5s, color 0.5s;
+}
+
+body.dark-mode {
+  background: #0d1117;
+  color: #fff;
+  --particle-color: rgba(0,255,255,0.25);
+}
+
+body.neon-mode {
+  background: linear-gradient(135deg, #1a0026, #000428);
+  color: #fff;
+  --particle-color: rgba(0,255,255,0.4);
+  text-shadow: 0 0 6px cyan;
+}
+
+
+/* Aurora gradient moving behind everything */
+.aurora {
+  position: fixed;
+  inset: 0;
+  background: radial-gradient(ellipse at 30% 40%, rgba(0,229,255,0.12), transparent 60%),
+              radial-gradient(ellipse at 70% 60%, rgba(138,255,122,0.12), transparent 60%);
+  animation: auroraMove 15s ease-in-out infinite alternate;
+  z-index: 1;
+  pointer-events: none;
+}
+@keyframes auroraMove {
+  0% { transform: translate(-5%, -5%) rotate(0deg); }
+  100% { transform: translate(5%, 5%) rotate(10deg); }
+}
+
+.page-transition {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: radial-gradient(circle at center, rgba(0, 255, 255, 0.8), rgba(0, 0, 0, 1) 80%);
+  opacity: 0;
+  pointer-events: none;
+  z-index: 9999;
+  transform: scale(0);
+  border-radius: 50%;
+  transition: transform 1.2s cubic-bezier(0.77, 0, 0.175, 1), opacity 0.8s ease;
+}
+
+.page-transition.active {
+  opacity: 1;
+  transform: scale(8);
+}
+
+#particles {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  pointer-events: none;
+  z-index: 9999;
+}
+
+.back-mini {
+  position: fixed;
+  top: 16px;
+  left: 18px;
+  width: 38px;
+  height: 38px;
+  border-radius: 50%;
+  background: rgba(0, 229, 255, 0.1);
+  border: 1px solid rgba(0, 229, 255, 0.4);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #00e5ff;
+  font-size: 18px;
+  font-weight: bold;
+  text-decoration: none;
+  backdrop-filter: blur(6px);
+  box-shadow: 0 0 6px rgba(0, 229, 255, 0.3);
+  z-index: 9999;
+  transition: all 0.25s ease;
+}
+
+.back-mini:hover {
+  background: rgba(0, 229, 255, 0.25);
+  box-shadow: 0 0 14px rgba(0, 229, 255, 0.6);
+  transform: scale(1.1);
+  color: #8aff7a;
+}
+
+.back-mini span {
+  position: relative;
+  top: -1px;
+}
+
+
+</style>
+</head>
+<body>
+  
+  <!-- background canvas -->
+  <canvas id="bg"></canvas>
+  <div class="page-transition"></div>
+  <div class="aurora"></div>
+
+ <canvas id="particles"></canvas>
+ 
+<!-- Tombol Kembali Kecil -->
+<a href="index.html" class="back-mini" title="Kembali">
+  <span>←</span>
+</a>
+
+
+<div class="theme-buttons">
+  <button id="lightBtn">☀️ Light</button>
+  <button id="darkBtn">🌙 Dark</button>
+  <button id="neonBtn">⚡ Neon</button>
+</div>
+<div class="wrap">
+
+  <header>
+    <div class="title">
+      <svg width="44" height="44" viewBox="0 0 24 24" fill="none" style="filter: drop-shadow(0 8px 24px rgba(0,229,255,0.06))">
+        <rect x="2" y="2" width="20" height="20" rx="6" stroke="url(#g)" stroke-width="1.2" fill="rgba(0,229,255,0.02)"/>
+        <defs><linearGradient id="g"><stop offset="0" stop-color="#00E5FF"/><stop offset="1" stop-color="#8AFF7A"/></linearGradient></defs>
+      </svg>
+      <div>
+        <h1>Kegiatan Kelas L3</h1>
+        <p>Galeri momen — interaktif, bergerak, dan responsif</p>
+      </div>
+    </div>
+
+    <div class="controls">
+      <div class="chip">Mode: Neon</div>
+      <div class="chip">Tampilkan: Terbaru</div>
+      <button id="particleModeBtn" class="chip">Ubah Mode Partikel</button>
+
+    </div>
+  </header>
+
+  <main class="cards-viewport">
+    <div class="cards" id="cards">
+      <!-- Card (buat banyak; gambar diganti sesuai foldermu) -->
+      <article class="card hide" tabindex="0">
+        <div class="tag">Bakar-Bakar</div>
+        <div class="media"><img src="c.jpg" alt="Bakar-bakar"></div>
+        <div class="info">
+          <h3>Malam Keakraban</h3>
+          <p>Bakar-bakar bersama cerita dan musik.</p>
+        </div>
+        <div class="b1"></div><div class="b2"></div><div class="b3"></div>
+        <div class="frame-dot"></div>
+        <div class="frame-line"></div>
+      </article>
+
+      <article class="card hide" tabindex="0">
+        <div class="tag">Study Tour</div>
+        <div class="media"><img src="d.jpg" alt="Study Tour"></div>
+        <div class="info">
+          <h3>Palembang Indah Mall</h3>
+          <p>Bingung mau beli apa.</p>
+        </div>
+        <div class="b1"></div><div class="b2"></div><div class="b3"></div>
+      </article>
+
+      <article class="card hide" tabindex="0">
+        <div class="tag">Bakti</div>
+        <div class="media"><img src="e.jpg" alt="Bakti Sosial"></div>
+        <div class="info">
+          <h3>Konvoi</h3>
+          <p>Iring-iringan menuju PIM</p>
+        </div>
+        <div class="b1"></div><div class="b2"></div><div class="b3"></div>
+      </article>
+
+      <article class="card hide" tabindex="0">
+        <div class="tag">Workshop</div>
+        <div class="media"><img src="danau.jpg" alt="Workshop"></div>
+        <div class="info">
+          <h3>Workshop Coding</h3>
+          <p>Hands-on project bersama tutor dan teman sekelas.</p>
+        </div>
+        <div class="b1"></div><div class="b2"></div><div class="b3"></div>
+      </article>
+
+      <article class="card hide" tabindex="0">
+        <div class="tag">Outbound</div>
+        <div class="media"><img src="danauman.jpg" alt="Outbound"></div>
+        <div class="info">
+          <h3>Outbound & Team Building</h3>
+          <p>Games lapangan dan tantangan tim untuk mempererat kerja sama.</p>
+        </div>
+        <div class="b1"></div><div class="b2"></div><div class="b3"></div>
+      </article>
+
+      <article class="card hide" tabindex="0">
+        <div class="tag">Photo</div>
+        <div class="media"><img src="matriks.jpg" alt="Photo Day"></div>
+        <div class="info">
+          <h3>Photo Day</h3>
+          <p>Sesi foto kreatif untuk kenangan kelas.</p>
+        </div>
+        <div class="b1"></div><div class="b2"></div><div class="b3"></div>
+      </article>
+
+          <article class="card hide" tabindex="0">
+        <div class="tag">Bakar-Bakar</div>
+        <div class="media"><img src="mall.jpg" alt="Bakar-bakar"></div>
+        <div class="info">
+          <h3>Malam Keakraban</h3>
+          <p>Kebersamaan dengan api unggun, cerita, dan musik.</p>
+        </div>
+        <div class="b1"></div><div class="b2"></div><div class="b3"></div>
+        <div class="frame-dot"></div>
+        <div class="frame-line"></div>
+      </article>
+
+         <article class="card hide" tabindex="0">
+        <div class="tag">Outbound</div>
+        <div class="media"><img src="badmn.jpg" alt="Outbound"></div>
+        <div class="info">
+          <h3>Outbound & Team Building</h3>
+          <p>Games lapangan dan tantangan tim untuk mempererat kerja sama.</p>
+        </div>
+        <div class="b1"></div><div class="b2"></div><div class="b3"></div>
+      </article>
+    </div>
+  </main>
+</div>
+
+<script>
+/* -------------------------
+   PARTICLE BACKGROUND (mouse parallax + drift)
+   ------------------------- */
+const canvas = document.getElementById('bg');
+const ctx = canvas.getContext('2d');
+let W = canvas.width = innerWidth;
+let H = canvas.height = innerHeight;
+
+window.addEventListener('resize', ()=>{ W = canvas.width = innerWidth; H = canvas.height = innerHeight; initParticles(); });
+
+let mouse = { x: W/2, y: H/2 };
+
+window.addEventListener('mousemove', (e)=>{ mouse.x = e.clientX; mouse.y = e.clientY; });
+
+class P {
+  constructor(){
+    this.reset();
+  }
+  reset(){
+    this.x = Math.random()*W;
+    this.y = Math.random()*H;
+    this.r = Math.random()*1.8 + 0.6;
+    this.vx = (Math.random()-0.5)*0.25;
+    this.vy = (Math.random()-0.5)*0.25;
+    this.h = Math.random()*360;
+    this.alpha = 0.12 + Math.random()*0.28;
+  }
+  step(){
+    // gentle drift + slight attraction to mouse (parallax)
+    const dx = (mouse.x - this.x) * 0.0008;
+    const dy = (mouse.y - this.y) * 0.0008;
+    this.x += this.vx + dx;
+    this.y += this.vy + dy;
+    if(this.x < -50 || this.x > W+50 || this.y < -50 || this.y > H+50) this.reset();
+  }
+  draw(){
+    ctx.beginPath();
+    ctx.fillStyle = `hsla(${Math.round(180+30*Math.sin(this.h))},100%,60%,${this.alpha})`;
+    ctx.globalCompositeOperation = 'lighter';
+    ctx.arc(this.x, this.y, this.r, 0, Math.PI*2);
+    ctx.fill();
+    ctx.globalCompositeOperation = 'source-over';
+  }
+}
+
+let particles = [];
+function initParticles(){
+  particles = [];
+  const count = Math.min(160, Math.floor((W*H)/10000));
+  for(let i=0;i<count;i++) particles.push(new P());
+}
+function loop(){
+  ctx.clearRect(0,0,W,H);
+  // radial gradient vignette
+  const g = ctx.createRadialGradient(W/2, H/3, 10, W/2, H/3, Math.max(W,H));
+  g.addColorStop(0, 'rgba(0,10,20,0)');
+  g.addColorStop(1, 'rgba(0,0,0,0.35)');
+  ctx.fillStyle = g;
+  ctx.fillRect(0,0,W,H);
+
+  for(let p of particles){ p.step(); p.draw(); }
+  requestAnimationFrame(loop);
+}
+initParticles();
+loop();
+
+/* -------------------------
+   CARD INTERACTIONS
+   - IntersectionObserver reveals cards with stagger
+   - Mouse movement tilts card in 3D and parallax image inside
+   ------------------------- */
+const cards = Array.from(document.querySelectorAll('.card'));
+const io = new IntersectionObserver((entries)=>{
+  entries.forEach(e=>{
+    if(e.isIntersecting){
+      e.target.classList.remove('hide');
+      e.target.classList.add('show');
+      io.unobserve(e.target);
+    }
+  });
+},{threshold:0.18});
+
+cards.forEach((c, i)=>{
+  io.observe(c);
+  // small randomize initial stagger transform removed by show
+  c.style.transitionDelay = `${i*80}ms`;
+  // mouse tilt
+  c.addEventListener('pointermove', (ev)=>{
+    const r = c.getBoundingClientRect();
+    const px = (ev.clientX - r.left) / r.width; // 0..1
+    const py = (ev.clientY - r.top) / r.height;
+    const tiltY = (px - 0.5) * 18; // rotateY
+    const tiltX = -(py - 0.5) * 10; // rotateX
+    c.style.setProperty('--tiltX', tiltX + 'deg');
+    c.style.setProperty('--tiltY', tiltY + 'deg');
+    // parallax image
+    const img = c.querySelector('.media img');
+    img.style.transform = `scale(1.06) translate3d(${(px-0.5)*10}px, ${(py-0.5)*8}px, 0)`;
+  });
+  c.addEventListener('pointerleave', ()=>{
+    c.style.setProperty('--tiltX', '0deg');
+    c.style.setProperty('--tiltY', '0deg');
+    const img = c.querySelector('.media img');
+    img.style.transform = '';
+  });
+
+  // keyboard accessibility: press Enter to "open" (demo animation)
+  c.addEventListener('keydown', (ev)=>{
+    if(ev.key === 'Enter' || ev.key === ' '){
+      ev.preventDefault();
+      c.animate([
+        { transform: 'translateZ(0) scale(1)' },
+        { transform: 'translateZ(24px) scale(1.03)' },
+        { transform: 'translateZ(0) scale(1)' }
+      ], { duration: 420, easing: 'cubic-bezier(.2,.9,.2,1)' });
+    }
+  });
+});
+
+/* -------------------------
+   Optional: dynamic add/remove cards example
+   (left as snippet you can hook to UI)
+   ------------------------- */
+// example function (not auto-called) to append a new card
+function addCard({img, title, tag, text}){
+  const c = document.createElement('article');
+  c.className = 'card hide';
+  c.tabIndex = 0;
+  c.innerHTML = `
+    <div class="tag">${tag || 'Event'}</div>
+    <div class="media"><img src="${img}" alt="${title}"></div>
+    <div class="info"><h3>${title}</h3><p>${text}</p></div>
+    <div class="b1"></div><div class="b2"></div><div class="b3"></div>
+    <div class="frame-dot"></div>`;
+  document.getElementById('cards').appendChild(c);
+  io.observe(c);
+}
+
+/* -------------------------
+   Lightweight touch: tilt on device orientation (mobile)
+   ------------------------- */
+if(window.DeviceOrientationEvent){
+  window.addEventListener('deviceorientation', (e)=>{
+    const gx = e.gamma || 0; // left-right
+    const gy = e.beta || 0;  // front-back
+    cards.forEach(c=>{
+      const tiltY = gx / 3; // smaller
+      const tiltX = gy / 10;
+      c.style.setProperty('--tiltX', tiltX + 'deg');
+      c.style.setProperty('--tiltY', tiltY + 'deg');
+    });
+  });
+}
+document.addEventListener('DOMContentLoaded', () => {
+  const canvas = document.getElementById('particles');
+  const ctx = canvas.getContext('2d');
+
+  // Sesuaikan ukuran canvas
+  function resize() {
+    canvas.width = window.innerWidth;
+    canvas.height = window.innerHeight;
+  }
+  window.addEventListener('resize', resize);
+  resize();
+
+  // Buat partikel
+  const particles = [];
+  const total = 80;
+
+  for (let i = 0; i < total; i++) {
+    particles.push({
+      x: Math.random() * canvas.width,
+      y: Math.random() * canvas.height,
+      size: Math.random() * 2,
+      xSpeed: (Math.random() - 0.5) * 1,
+      ySpeed: (Math.random() - 0.5) * 1
+    });
+  }
+
+  // Animasi partikel
+  function animate() {
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+    const color = getComputedStyle(document.body).getPropertyValue('--particle-color');
+    ctx.fillStyle = color;
+
+    particles.forEach(p => {
+      p.x += p.xSpeed;
+      p.y += p.ySpeed;
+
+      if (p.x < 0 || p.x > canvas.width) p.xSpeed *= -1;
+      if (p.y < 0 || p.y > canvas.height) p.ySpeed *= -1;
+
+      ctx.beginPath();
+      ctx.arc(p.x, p.y, p.size, 0, Math.PI * 2);
+      ctx.fill();
+    });
+
+    requestAnimationFrame(animate);
+  }
+  animate();
+
+  // Tombol tema
+  const lightBtn = document.getElementById('lightBtn');
+  const darkBtn = document.getElementById('darkBtn');
+  const neonBtn = document.getElementById('neonBtn');
+
+  if (lightBtn && darkBtn && neonBtn) {
+    lightBtn.onclick = () => document.body.className = '';
+    darkBtn.onclick = () => document.body.className = 'dark-mode';
+    neonBtn.onclick = () => document.body.className = 'neon-mode';
+  }
+});
+
+/* -------------------------
+   EXTRA EFFECT 4: GLOW PULSE ON PARTICLES
+   (menambahkan efek berdenyut lembut pada partikel di latar)
+------------------------- */
+let pulse = 0;
+function glowPulse() {
+  pulse += 0.03;
+  const glow = 0.5 + Math.sin(pulse) * 0.5;
+  ctx.save();
+  ctx.globalCompositeOperation = 'lighter';
+  for (let p of particles) {
+    ctx.beginPath();
+    ctx.fillStyle = `hsla(${180 + 20 * Math.sin(p.h)}, 100%, ${60 + 20 * glow}%, ${p.alpha * 0.7})`;
+    ctx.arc(p.x, p.y, p.r * (1.2 + glow * 0.3), 0, Math.PI * 2);
+    ctx.fill();
+  }
+  ctx.restore();
+}
+ 
+// tambahkan panggilan di loop animasi partikel
+const oldLoop = loop;
+loop = function() {
+  ctx.clearRect(0, 0, W, H);
+  const g = ctx.createRadialGradient(W / 2, H / 3, 10, W / 2, H / 3, Math.max(W, H));
+  g.addColorStop(0, 'rgba(0,10,20,0)');
+  g.addColorStop(1, 'rgba(0,0,0,0.35)');
+  ctx.fillStyle = g;
+  ctx.fillRect(0, 0, W, H);
+
+  for (let p of particles) {
+    p.step();
+    p.draw();
+  }
+  glowPulse(); // <--- panggil efek baru di sini
+  requestAnimationFrame(loop);
+};
+
+/* -------------------------
+   EXTRA EFFECT 5: PARTICLE EXPLOSION ON CLICK
+------------------------- */
+window.addEventListener('click', (e) => {
+  const burstCount = 20;
+  for (let i = 0; i < burstCount; i++) {
+    const p = new P();
+    p.x = e.clientX;
+    p.y = e.clientY;
+    p.vx = (Math.random() - 0.5) * 2;
+    p.vy = (Math.random() - 0.5) * 2;
+    p.r = Math.random() * 2.5 + 1;
+    particles.push(p);
+  }
+});
+
+/* -------------------------
+   EXTRA EFFECT 7: RANDOM PARTICLE MODE SWITCHER
+------------------------- */
+const particleModes = [
+  { colorShift: 180, speed: 0.25, size: 2 },
+  { colorShift: 60,  speed: 0.5,  size: 2.5 },
+  { colorShift: 300, speed: 0.15, size: 1.2 },
+  { colorShift: 0,   speed: 0.4,  size: 1.8 }
+];
+
+let currentMode = 0;
+const modeBtn = document.getElementById('particleModeBtn');
+
+modeBtn.addEventListener('click', () => {
+  currentMode = (currentMode + 1) % particleModes.length;
+  const m = particleModes[currentMode];
+
+  // update particle properties
+  particles.forEach(p => {
+    p.h = Math.random() * 360 + m.colorShift;
+    p.vx = (Math.random() - 0.5) * m.speed;
+    p.vy = (Math.random() - 0.5) * m.speed;
+    p.r = Math.random() * m.size + 0.6;
+  });
+
+  // tombol berubah warna biar kelihatan interaktif
+  modeBtn.style.background = `linear-gradient(90deg, hsl(${m.colorShift},100%,50%), hsl(${(m.colorShift+60)%360},100%,60%))`;
+  modeBtn.style.color = "#002";
+  modeBtn.textContent = "Mode Partikel: " + (currentMode + 1);
+});
+
+/* -------------------------
+   FADE TRANSITION BETWEEN MODES
+------------------------- */
+let fadeAlpha = 0;
+let fading = false;
+
+function fadeTransition() {
+  if (fading) {
+    fadeAlpha += 0.05;
+    ctx.fillStyle = `rgba(0, 0, 0, ${fadeAlpha * 0.2})`;
+    ctx.fillRect(0, 0, canvas.width, canvas.height);
+    if (fadeAlpha >= 1) {
+      fadeAlpha = 0;
+      fading = false;
+    } else {
+      requestAnimationFrame(fadeTransition);
+    }
+  }
+}
+
+// aktifkan fade setiap kali tombol diklik
+modeBtn.addEventListener('click', () => {
+  fading = true;
+  fadeTransition();
+});
+
+  const links = document.querySelectorAll('a');
+  const transition = document.querySelector('.page-transition');
+
+  links.forEach(link => {
+    const href = link.getAttribute('href');
+    if (href && !href.startsWith('#')) {
+      link.addEventListener('click', e => {
+        e.preventDefault();
+        transition.classList.add('active');
+        setTimeout(() => {
+          window.location.href = href;
+        }, 1000); // sesuai durasi animasi warp
+      });
+    }
+  }); 
+
+document.querySelector('.back-mini').addEventListener('click', (e)=>{
+  e.preventDefault();
+  document.body.style.transition = 'opacity 0.5s ease';
+  document.body.style.opacity = '0';
+  setTimeout(()=> window.location.href = e.target.closest('a').href, 400);
+});
+
+
+</script>
+</body>
+</html>

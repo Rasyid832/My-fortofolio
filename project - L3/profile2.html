@@ -1,0 +1,650 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Profile Kelas L3</title>
+  <style>
+ :root {
+  --bg: #f5f9ff;
+  --text: #111;
+  --accent: #0078ff;
+  --card-bg: #ffffff;
+  --section: #eaf1ff;
+  --footer-bg: #e9f1ff;
+}
+
+body.dark-mode {
+  --bg: #0b1320;
+  --text: #e8f0ff;
+  --accent: #00ffff;
+  --card-bg: #111a2b;
+  --section: #0f1f33;
+  --footer-bg: #000814;
+}
+
+body {
+  margin: 0;
+  font-family: "Segoe UI", sans-serif;
+  background: var(--bg);
+  color: var(--text);
+  line-height: 1.6;
+  transition: background 0.6s, color 0.6s;
+  overflow-x: hidden;
+}
+
+/* Tombol switch dark mode */
+.theme-switch-wrapper {
+  position: fixed;
+  top: 20px;
+  right: 25px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  z-index: 1000;
+  color: var(--text);
+  font-size: 14px;
+}
+.theme-switch {
+  position: relative;
+  display: inline-block;
+  width: 52px;
+  height: 28px;
+}
+.theme-switch input {
+  opacity: 0;
+  width: 0;
+  height: 0;
+}
+.slider {
+  position: absolute;
+  cursor: pointer;
+  inset: 0;
+  background-color: #aaa;
+  transition: 0.4s;
+  border-radius: 34px;
+}
+.slider::before {
+  content: "";
+  position: absolute;
+  height: 20px;
+  width: 20px;
+  left: 4px;
+  bottom: 4px;
+  background-color: #fff;
+  transition: 0.4s;
+  border-radius: 50%;
+}
+input:checked + .slider {
+  background-color: var(--accent);
+}
+input:checked + .slider::before {
+  transform: translateX(24px);
+}
+
+/* Tombol kembali */
+.back-btn {
+  position: fixed;
+  bottom: 20px;
+  left: 25px;
+  background: var(--card-bg);
+  color: var(--accent);
+  padding: 8px 18px;
+  border-radius: 20px;
+  font-size: 14px;
+  text-decoration: none;
+  transition: 0.3s;
+  border: 1px solid var(--accent);
+  z-index: 1000;
+}
+.back-btn:hover {
+  background: var(--accent);
+  color: #000;
+  transform: scale(1.05);
+}
+
+/* Hero */
+.hero {
+  height: 60vh;
+  background: linear-gradient(rgba(0,0,0,0.4), rgba(0,0,0,0.4)),
+              url('b.jpg') center/cover no-repeat;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  text-align: center;
+  color: #fff;
+  padding: 0 10px;
+}
+.hero h1 {
+  font-size: clamp(22px, 5vw, 48px);
+  margin: 0;
+  text-shadow: 0 0 10px var(--accent);
+  line-height: 1.2;
+  max-width: 95%;
+}
+.hero p {
+  font-size: clamp(14px, 3vw, 18px);
+  opacity: 0.9;
+}
+
+/* Struktur Kelas */
+.org-section {
+  padding: 60px 20px;
+  text-align: center;
+  background: linear-gradient(135deg, rgba(0,255,255,0.05), rgba(0,0,0,0.3));
+}
+
+.org-section h2 {
+  font-size: 32px;
+  margin-bottom: 40px;
+  color: var(--accent);
+  text-shadow: 0 0 10px var(--accent);
+}
+
+.org-grid {
+  display: flex;
+  justify-content: center;
+  flex-wrap: wrap;
+  gap: 40px;
+}
+
+.org-card {
+  background: var(--card-bg);
+  border-radius: 16px;
+  padding: 25px 20px;
+  width: 240px;
+  text-align: center;
+  transition: all 0.4s ease;
+  border: 1.5px solid var(--accent);
+  box-shadow: 0 0 12px rgba(0,255,255,0.3);
+  position: relative;
+  overflow: hidden;
+}
+
+.org-card::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: radial-gradient(circle at top center, rgba(0,255,255,0.2), transparent 70%);
+  opacity: 0;
+  transition: 0.4s;
+}
+
+.org-card:hover::before {
+  opacity: 1;
+}
+
+.org-card:hover {
+  transform: translateY(-10px) scale(1.05);
+  box-shadow: 0 0 25px rgba(0,255,255,0.5);
+}
+
+.org-card img {
+  width: 120px;
+  height: 120px;
+  border-radius: 50%;
+  border: 3px solid var(--accent);
+  margin-bottom: 12px;
+  transition: 0.4s;
+  box-shadow: 0 0 15px rgba(0,255,255,0.4);
+}
+
+.org-card:hover img {
+  transform: rotate(5deg) scale(1.1);
+  box-shadow: 0 0 25px rgba(0,255,255,0.6);
+}
+
+.org-card h3 {
+  margin: 8px 0 4px;
+  font-size: 18px;
+}
+
+.org-card p {
+  font-size: 14px;
+  opacity: 0.8;
+}
+
+/* Responsif */
+@media (max-width: 768px) {
+  .org-card {
+    width: 90%;
+    max-width: 300px;
+  }
+  .org-card img {
+    width: 100px;
+    height: 100px;
+  }
+}
+
+
+/* Tentang kelas */
+.about {
+  padding: 60px 20px;
+  background: linear-gradient(135deg, #89f7fe, #66a6ff);
+  text-align: center;
+  color: #000;
+  transition: 0.4s;
+}
+body.dark-mode .about {
+  color: #fff;
+  background: linear-gradient(135deg, #0078ff, #002b55);
+}
+.about p {
+  max-width: 800px;
+  margin: auto;
+  font-size: clamp(14px, 2vw, 18px);
+}
+
+/* Jadwal */
+.schedule {
+  padding: 60px 20px;
+  text-align: center;
+  background: var(--section);
+}
+.schedule table {
+  width: 90%;
+  max-width: 800px;
+  margin: auto;
+  border-collapse: collapse;
+  background: var(--card-bg);
+  border-radius: 12px;
+  overflow: hidden;
+  font-size: clamp(12px, 2vw, 16px);
+}
+.schedule th, .schedule td {
+  padding: 10px 14px;
+  border-bottom: 1px solid rgba(255,255,255,0.1);
+  text-align: left;
+}
+.schedule th {
+  background: var(--accent);
+  color: #fff;
+}
+
+/* Galeri */
+.gallery {
+  padding: 60px 20px;
+  background: var(--bg);
+  text-align: center;
+}
+.gallery-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+  gap: 15px;
+  margin-top: 30px;
+}
+.gallery-item {
+  position: relative;
+  overflow: hidden;
+  border-radius: 12px;
+  cursor: pointer;
+}
+.gallery-item img {
+  width: 100%;
+  display: block;
+  transition: 0.5s;
+}
+.gallery-item:hover img {
+  transform: scale(1.1);
+  filter: brightness(70%);
+}
+.gallery-item span {
+  position: absolute;
+  bottom: 20px;
+  left: 20px;
+  font-weight: bold;
+  opacity: 0;
+  transition: 0.5s;
+  color: #fff;
+  text-shadow: 0 0 8px #000;
+}
+.gallery-item:hover span {
+  opacity: 1;
+}
+
+/* Quotes */
+.quotes {
+  padding: 70px 20px;
+  text-align: center;
+  font-size: clamp(16px, 3vw, 24px);
+  font-style: italic;
+  background: linear-gradient(rgba(0,255,255,0.05), rgba(0,0,0,0.3));
+  color: var(--text);
+}
+
+/* Footer */
+footer {
+  background: var(--footer-bg);
+  text-align: center;
+  padding: 25px 10px;
+  font-size: clamp(12px, 1.8vw, 14px);
+  color: var(--text);
+  transition: 0.4s;
+}
+.social-icons {
+  display: flex;
+  justify-content: center;
+  gap: 25px;
+  margin-bottom: 10px;
+  flex-wrap: wrap;
+}
+.social-icons a img {
+  width: 35px;
+  height: 35px;
+  transition: transform 0.3s;
+  filter: drop-shadow(0 0 5px var(--accent));
+}
+.social-icons a img:hover {
+  transform: scale(1.2);
+  opacity: 0.8;
+}
+
+/* 🔹 Responsif Tambahan */
+@media (max-width: 768px) {
+  .hero {
+    height: 50vh;
+  }
+  .back-btn {
+    bottom: 15px;
+    left: 15px;
+    padding: 6px 14px;
+    font-size: 13px;
+  }
+  .theme-switch-wrapper {
+    top: 15px;
+    right: 15px;
+  }
+}
+@media (max-width: 480px) {
+  .hero {
+    height: 45vh;
+    padding: 0 8px;
+  }
+  .hero h1 {
+    font-size: 22px;
+  }
+  .hero p {
+    font-size: 13px;
+  }
+  .schedule table {
+    width: 100%;
+    font-size: 12px;
+  }
+}
+
+/* Animasi scroll */
+.org-card, .about, .schedule, .gallery, .quotes {
+  opacity: 0;
+  transform: translateY(30px);
+  transition: opacity 0.6s ease-out, transform 0.6s ease-out;
+}
+
+.org-card.visible, .about.visible, .schedule.visible, .gallery.visible, .quotes.visible {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+#particles {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  pointer-events: none; /* agar tidak mengganggu klik */
+  z-index: 0; /* pastikan di belakang konten */
+}
+.hero {
+  position: relative;
+  height: 60vh;
+  background: url('b.jpg') center/cover no-repeat;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  text-align: center;
+  color: #fff;
+  padding: 0 10px;
+  overflow: hidden;
+}
+.hero h1, .hero p {
+  position: relative;
+  z-index: 2; /* pastikan teks di atas background */
+}
+
+.org-card {
+  opacity: 0;
+  transform: translateY(30px);
+  transition: opacity 0.6s ease-out, transform 0.6s ease-out;
+}
+
+.org-card.visible {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+
+  </style>
+</head>
+<body class="dark-mode">
+  <canvas id="particles"></canvas>
+
+  <!-- Tombol Dark Mode -->
+  <div class="theme-switch-wrapper">
+    <label class="theme-switch">
+      <input type="checkbox" id="theme-toggle" checked>
+      <span class="slider"></span>
+    </label>
+    <span>Dark Mode</span>
+  </div>
+
+  <!-- Tombol Kembali -->
+  <a href="index.html" class="back-btn">⬅ Kembali</a>
+
+  <!-- Hero -->
+  <section class="hero">
+    <h1>Profile Kelas L3 – Informatika 2025</h1>
+    <p>Komputer adalah Sahabat Kami</p>
+  </section>
+
+  <!-- Struktur Organisasi -->
+  <section class="org-section">
+    <h2>Struktur Kelas</h2>
+    <div class="org-grid">
+      <div class="org-card">
+        <img src="arzu.jpg" alt="Ketua">
+        <h3>Tuah Sahahjahan Arzu</h3>
+        <p>Ketua Kelas</p>
+      </div>
+      <div class="org-card">
+        <img src="jihan.jpg" alt="Wakil">
+        <h3>Jihan</h3>
+        <p>Wakil Ketua</p>
+      </div>
+      <div class="org-card">
+        <img src="sulivan.jpg" alt="Sekretaris">
+        <h3>Sulivan</h3>
+        <p>Sekretaris</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- Tentang Kelas -->
+  <section class="about">
+    <h2>Tentang Kelas</h2>
+    <p>Kelas L3 Informatika 2025 adalah rumah kedua bagi setiap anggotanya. 
+       Dengan semangat kebersamaan, kami terus belajar, berkolaborasi, 
+       dan tumbuh bersama untuk mencapai masa depan yang lebih baik.</p>
+  </section>
+
+  <!-- Jadwal Kelas -->
+  <section class="schedule">
+    <h2>Jadwal Kelas</h2>
+    <table>
+      <tr><th>Hari</th><th>Mata Kuliah</th><th>Waktu</th></tr>
+      <tr><td>Senin</td><td>Pengantar Algoritma & Struktur Data, Pemrograman Komputer</td><td>08.00 - 10.30 & 10.35 - 13.30</td></tr>
+      <tr><td>Rabu</td><td>Pancasila & Pengantar Teknologi Informasi</td><td>08.00 - 09.50 & 10.30 - 13.30</td></tr>
+      <tr><td>Kamis</td><td>Agama & Matriks Vektor</td><td>09.50 - 11.50 & 13.40 - 16.00</td></tr>
+      <tr><td>Jumat</td><td>Kalkulus & Praktikum Pemrograman Komputer</td><td>08.00 - 10.30 & 14.00 - 16.00</td></tr>
+    </table>
+  </section>
+
+  <!-- Galeri -->
+  <section class="gallery">
+    <h2>Galeri Kegiatan</h2>
+    <div class="gallery-grid">
+      <div class="gallery-item">
+        <img src="c.jpg" alt="">
+        <span>Bakar - bakar</span>
+      </div>
+      <div class="gallery-item">
+        <img src="d.jpg" alt="">
+        <span>Ngemall</span>
+      </div>
+      <div class="gallery-item">
+        <img src="e.jpg" alt="">
+        <span>Motoran</span>
+      </div>
+    </div>
+  </section>
+
+  <!-- Quotes -->
+  <section class="quotes">
+    <p>"Kebersamaan adalah energi kita."</p>
+  </section>
+
+  <!-- Footer -->
+  <footer>
+    <div class="social-icons">
+      <a href="https://www.instagram.com/threelogy.it/?utm_source=ig_web_button_share_sheet" target="_blank" title="Instagram">
+        <img src="https://upload.wikimedia.org/wikipedia/commons/a/a5/Instagram_icon.png" alt="Instagram">
+      </a>
+      <a href="https://wa.me/" target="_blank" title="WhatsApp">
+        <img src="https://upload.wikimedia.org/wikipedia/commons/6/6b/WhatsApp.svg" alt="WhatsApp">
+      </a>
+    </div>
+    <p>© 2025 Kelas L3 - Informatika UNSRI</p>
+  </footer>
+
+  <script>
+    const toggle = document.getElementById('theme-toggle');
+    const body = document.body;
+
+    // default dark mode aktif
+    toggle.checked = true;
+
+    toggle.addEventListener('change', () => {
+      if (toggle.checked) {
+        body.classList.add('dark-mode');
+      } else {
+        body.classList.remove('dark-mode');
+      }
+    });
+
+    // Efek scroll tanpa menambahkan kelas baru
+const scrollElements = document.querySelectorAll('.org-card, .about, .schedule, .gallery, .quotes');
+
+const elementInView = (el, offset = 0) => {
+  const elementTop = el.getBoundingClientRect().top;
+  return elementTop <= (window.innerHeight || document.documentElement.clientHeight) - offset;
+};
+
+const displayScrollElement = (el) => {
+  el.classList.add('visible');
+};
+
+const hideScrollElement = (el) => {
+  el.classList.remove('visible');
+};
+
+const handleScrollAnimation = () => {
+  scrollElements.forEach(el => {
+    if (elementInView(el, 100)) {
+      displayScrollElement(el);
+    } else {
+      hideScrollElement(el);
+    }
+  });
+};
+
+window.addEventListener('scroll', handleScrollAnimation);
+window.addEventListener('load', handleScrollAnimation);
+
+// Partikel bergerak
+const canvas = document.getElementById('particles');
+const ctx = canvas.getContext('2d');
+let particlesArray;
+
+function initParticles() {
+  canvas.width = window.innerWidth;
+  canvas.height = window.innerHeight;
+
+  particlesArray = [];
+  const numberOfParticles = 100; // jumlah partikel
+
+  for (let i = 0; i < numberOfParticles; i++) {
+    particlesArray.push({
+      x: Math.random() * canvas.width,
+      y: Math.random() * canvas.height,
+      size: Math.random() * 3 + 1,
+      speedX: (Math.random() - 0.5) * 1.5,
+      speedY: (Math.random() - 0.5) * 1.5,
+      color: 'rgba(0,255,255,0.7)'
+    });
+  }
+}
+
+function animateParticles() {
+  ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+  particlesArray.forEach(p => {
+    ctx.beginPath();
+    ctx.arc(p.x, p.y, p.size, 0, Math.PI * 2);
+    ctx.fillStyle = p.color;
+    ctx.fill();
+
+    p.x += p.speedX;
+    p.y += p.speedY;
+
+    // jika partikel keluar layar, muncul dari sisi lain
+    if (p.x < 0) p.x = canvas.width;
+    if (p.x > canvas.width) p.x = 0;
+    if (p.y < 0) p.y = canvas.height;
+    if (p.y > canvas.height) p.y = 0;
+  });
+
+  requestAnimationFrame(animateParticles);
+}
+
+// inisialisasi
+initParticles();
+animateParticles();
+
+// resize canvas saat ukuran window berubah
+window.addEventListener('resize', () => {
+  initParticles();
+});
+
+// Efek parallax hero
+const hero = document.querySelector('.hero');
+
+window.addEventListener('scroll', () => {
+  const scrollY = window.scrollY;
+  // Background bergerak lebih lambat daripada scroll
+  hero.style.backgroundPosition = `center ${scrollY * 0.5}px`;
+});
+
+
+const heroText = hero.querySelectorAll('h1, p');
+
+window.addEventListener('scroll', () => {
+  const scrollY = window.scrollY;
+  hero.style.backgroundPosition = `center ${scrollY * 0.5}px`;
+  
+  heroText.forEach(el => {
+    el.style.transform = `translateY(${scrollY * 0.2}px)`; // teks bergerak lebih lambat
+  });
+});
+  </script>
+</body>
+</html>

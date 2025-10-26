@@ -1,0 +1,1091 @@
+=<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Kelas L3 - Threelogy</title>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body {
+      font-family: Arial, sans-serif;
+      background: #f5f5f5;
+      color: #222;
+      overflow-x: hidden;
+      scroll-behavior: smooth;
+      transition: background 0.4s, color 0.4s;
+      min-height: 100dvh;
+    }
+
+    /* Navbar */
+    .navbar {
+      background: #111;
+      color: #fff;
+      padding: 15px 30px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      position: fixed;
+      top: 0; left: 0; right: 0;
+      z-index: 1000;
+    }
+    .navbar h1 { font-size: 20px; }
+    .navbar h1 span { color: grey; }
+    .navbar ul { list-style: none; display: flex; gap: 20px; }
+    .navbar ul li a {
+      color: #fff;
+      text-decoration: none;
+      font-weight: bold;
+      position: relative;
+      padding-bottom: 5px;
+      transition: color 0.3s ease;
+    }
+    .navbar ul li a::after {
+      content: "";
+      position: absolute;
+      left: 0; bottom: 0;
+      width: 0;
+      height: 2px;
+      background: gray;
+      transition: width 0.3s ease;
+    }
+    .navbar ul li a:hover::after { width: 100%; }
+
+    /* Switch Toggle */
+    .toggle-container {
+      position: relative;
+      width: 60px;
+      height: 30px;
+    }
+    .toggle-container input {
+      opacity: 0;
+      width: 0;
+      height: 0;
+    }
+    .slider {
+      position: absolute;
+      cursor: pointer;
+      top: 0; left: 0; right: 0; bottom: 0;
+      background-color: #ccc;
+      transition: 0.4s;
+      border-radius: 34px;
+    }
+    .slider::before {
+      position: absolute;
+      content: "";
+      height: 24px;
+      width: 24px;
+      left: 3px;
+      bottom: 3px;
+      background-color: white;
+      transition: 0.4s;
+      border-radius: 50%;
+    }
+    input:checked + .slider {
+      background-color: #00ffcc;
+    }
+    input:checked + .slider::before {
+      transform: translateX(30px);
+    }
+
+    /* Hero */
+    .hero {
+      position: relative;
+      height: 100vh;
+      overflow: hidden;
+    }
+    .heroSlide {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      position: absolute;
+      top: 0;
+      left: 0;
+      opacity: 0;
+      transition: opacity 1.5s ease-in-out;
+      z-index: 0;
+    }
+    .heroSlide.active { opacity: 1; z-index: 1; }
+    .hero-text {
+      position: absolute;
+      top: 50%; left: 50%;
+      transform: translate(-50%, -50%);
+      color: #fff;
+      text-align: center;
+      z-index: 10;
+    }
+    .hero-text h2 {
+      font-size: 48px;
+      margin-bottom: 15px;
+      text-shadow: 0 0 10px #00ccff;
+    }
+    .hero-text p {
+      font-size: 20px;
+      text-shadow: 0 0 5px #00ffcc;
+    }
+
+    /* Cards */
+    .cards {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+      gap: 25px;
+      padding: 80px 40px;
+      background: #fff;
+      transition: background 0.4s, color 0.4s;
+    }
+    .card {
+      background: #111;
+      border-radius: 15px;
+      padding: 20px;
+      text-align: center;
+      box-shadow: 0 0 15px rgba(0,0,0,0.4);
+      transition: all 0.4s ease;
+      color: #fff;
+      position: relative;
+      overflow: hidden;
+      border: 2px solid transparent;
+      opacity: 0;
+      transform: translateY(50px);
+    }
+    .card img { width: 80px; margin-bottom: 15px; transition: transform 0.3s ease; }
+    .card:hover {
+      transform: translateY(-10px) scale(1.05);
+      box-shadow: 0 0 40px #00ffcc;
+      border: 2px solid #00ffcc;
+    }
+    .card:hover img { transform: scale(1.15); }
+    .card h2 { margin-bottom: 10px; font-size: 20px; color: #00ffcc; }
+    .card p { font-size: 14px; color: #ddd; }
+    .card.show { opacity: 1; transform: translateY(0); }
+
+    /* Map */
+    .map-section {
+      padding: 60px 20px;
+      text-align: center;
+      background: #f5f5f5;
+      opacity: 0;
+      transform: translateY(50px);
+      transition: all 1s ease;
+    }
+    .map-section h2 { margin-bottom: 20px; }
+    .map-section iframe {
+      width: 100%;
+      max-width: 800px;
+      height: 400px;
+      border: none;
+      border-radius: 10px;
+    }
+    .map-section.show { opacity: 1; transform: translateY(0); }
+
+    /* Playlist & Games */
+    .playlist, .mini-games {
+      padding: 60px 20px 100px;
+      background: #fff;
+      text-align: center;
+      opacity: 0;
+      transform: translateY(50px);
+      transition: all 1s ease;
+    }
+    .playlist.show, .mini-games.show {
+      opacity: 1;
+      transform: translateY(0);
+    }
+    .playlist iframe {
+      width: 100%;
+      max-width: 800px;
+      height: 380px;
+      border: none;
+      border-radius: 10px;
+      margin-top: 15px;
+    }
+
+    /* Buttons */
+    .game-btn-container, .game-btn-container2 {
+      margin-top: 30px;
+      text-align: center;
+      opacity: 0;
+      transform: translateY(40px);
+      transition: all 1s ease;
+    }
+    .game-btn-container.show, .game-btn-container2.show {
+      opacity: 1;
+      transform: translateY(0);
+    }
+    .game-btn, .game-btn2 {
+      display: inline-block;
+      padding: 14px 32px;
+      margin: 10px;
+      background: linear-gradient(135deg, #00ffcc, #0066ff);
+      color: #fff;
+      font-size: 18px;
+      font-weight: bold;
+      text-decoration: none;
+      border-radius: 12px;
+      box-shadow: 0 6px 15px rgba(0,0,0,0.4);
+      transition: all 0.3s ease;
+    }
+    .game-btn:hover, .game-btn2:hover {
+      background: linear-gradient(135deg, #0066ff, #00ffcc);
+      transform: translateY(-4px) scale(1.05);
+      box-shadow: 0 8px 20px rgba(0,255,204,0.8);
+    }
+
+    /* Footer */
+    footer {
+      background: #111;
+      color: #fff;
+      text-align: center;
+      padding: 20px;
+    }
+
+    /* Overlay */
+    #overlay {
+      position: fixed;
+      top: 0; left: 0;
+      width: 100%; height: 100%;
+      background: #000;
+      z-index: 2000;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      color: #fff;
+      font-size: 28px;
+      letter-spacing: 2px;
+      font-weight: bold;
+      transition: opacity 1.5s ease;
+    }
+    #overlay.hidden { opacity: 0; pointer-events: none; }
+
+    /* 🌙 Dark Mode Style */
+    body.dark-mode { background: #0d1117; color: #e6e6e6; }
+    body.dark-mode .navbar { background: #0b0b0b; color: #4db8ff; }
+    body.dark-mode .navbar ul li a { color: #4db8ff; }
+    body.dark-mode .cards { background: #1a1a1a; color: #e6e6e6; }
+    body.dark-mode .card { background: #161b22; color: #e6e6e6; border-color: #4db8ff33; }
+    body.dark-mode .playlist, body.dark-mode .mini-games { background: #1a1a1a; color: #e6e6e6; }
+    body.dark-mode .map-section { background: #1a1a1a; color: #e6e6e6; }
+    body.dark-mode footer { background: #000; color: #4db8ff; }
+    body.dark-mode .game-btn, body.dark-mode .game-btn2 {
+      background: linear-gradient(135deg, #4db8ff, #0033aa);
+    }
+    body.dark-mode .slider { background-color: #555; }
+    body.dark-mode .slider::before { background-color: #fff; }
+
+    /* 🌍 Responsiveness (Agar tampilan bagus di semua perangkat) */
+
+/* Untuk HP kecil (lebar <= 600px) */
+@media (max-width: 600px) {
+  .navbar {
+    flex-direction: column;
+    align-items: flex-start;
+    padding: 10px 20px;
+  }
+
+  .navbar h1 {
+    font-size: 18px;
+    margin-bottom: 8px;
+  }
+
+  .navbar ul {
+    flex-direction: column;
+    gap: 10px;
+    width: 100%;
+  }
+
+  .navbar ul li a {
+    font-size: 16px;
+    padding: 5px 0;
+  }
+
+  .hero-text h2 {
+    font-size: 28px;
+  }
+
+  .hero-text p {
+    font-size: 16px;
+  }
+
+  .cards {
+    grid-template-columns: 1fr;
+    padding: 60px 20px;
+  }
+
+  .card {
+    padding: 18px;
+  }
+
+  .map-section iframe {
+    height: 300px;
+  }
+
+  .game-btn, .game-btn2 {
+    width: 90%;
+    font-size: 16px;
+  }
+
+  .playlist iframe {
+    height: 300px;
+  }
+}
+
+/* Untuk tablet (lebar antara 601px – 992px) */
+@media (min-width: 601px) and (max-width: 992px) {
+  .navbar ul {
+    gap: 15px;
+  }
+
+  .navbar h1 {
+    font-size: 19px;
+  }
+
+  .hero-text h2 {
+    font-size: 36px;
+  }
+
+  .hero-text p {
+    font-size: 18px;
+  }
+
+  .cards {
+    grid-template-columns: repeat(2, 1fr);
+    padding: 70px 30px;
+  }
+
+  .map-section iframe {
+    height: 350px;
+  }
+
+  .playlist iframe {
+    height: 340px;
+  }
+}
+
+/* Untuk laptop besar (>= 993px) */
+@media (min-width: 993px) {
+  .hero-text h2 {
+    font-size: 48px;
+  }
+  .hero-text p {
+    font-size: 20px;
+  }
+  .cards {
+    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+  }
+}
+
+/* === 📱 Responsive Navbar (Hamburger) === */
+/* === 📱 Responsive Navbar (Hamburger) === */
+.hamburger {
+  display: none;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  width: 35px;
+  height: 30px;
+  cursor: pointer;
+  z-index: 2001;
+  position: absolute;
+  top: 18px; /* atur tinggi sesuai navbar kamu */
+  right: 25px; /* pojok kanan */
+}
+.hamburger span {
+  height: 3px;
+  width: 100%;
+  background: white;
+  border-radius: 5px;
+  margin: 4px 0;
+  transition: 0.4s;
+}
+
+/* Saat hamburger aktif */
+.hamburger.active span:nth-child(1) {
+  transform: rotate(45deg) translateY(8px);
+}
+.hamburger.active span:nth-child(2) {
+  opacity: 0;
+}
+.hamburger.active span:nth-child(3) {
+  transform: rotate(-45deg) translateY(-8px);
+}
+
+/* Tampilkan hamburger & sembunyikan menu di HP */
+@media (max-width: 768px) {
+  .navbar {
+    position: relative;
+  }
+
+  .navbar ul {
+    display: none;
+    flex-direction: column;
+    background: rgba(0, 0, 0, 0.9);
+    position: absolute;
+    top: 60px;
+    right: 0;
+    width: 220px;
+    padding: 15px;
+    border-radius: 10px 0 0 10px;
+    z-index: 2000;
+  }
+
+  .navbar ul.show {
+    display: flex;
+  }
+
+  .hamburger {
+    display: flex;
+  }
+}
+
+/* === PERBAIKAN KHUSUS UNTUK TABLET (600px–1024px) === */
+@media (min-width: 600px) and (max-width: 1024px) {
+  .hamburger {
+    top: 18px;
+    right: 70px; /* geser sedikit ke kiri agar tidak menimpa tombol dark mode */
+  }
+
+  .dark-mode-toggle {
+    position: absolute;
+    top: 15px;
+    right: 20px;
+    z-index: 2002; /* pastikan tetap di atas layer lain */
+  }
+}
+
+/* === FIX KHUSUS UNTUK TABLET (600px–1024px) === */
+@media (min-width: 600px) and (max-width: 1024px) {
+  .navbar {
+    position: relative;
+  }
+
+  .hamburger {
+    position: absolute;
+    top: 18px;
+    right: 120px; /* Geser lebih jauh ke kiri */
+    z-index: 2001;
+  }
+
+  .dark-mode-toggle {
+    position: absolute;
+    top: 15px;
+    right: 20px; /* Tetap di pojok kanan */
+    z-index: 2002;
+  }
+
+  .navbar ul {
+    display: none;
+    flex-direction: column;
+    position: absolute;
+    top: 65px;
+    right: 0;
+    width: 240px;
+    background: rgba(0, 0, 0, 0.9);
+    padding: 15px;
+    border-radius: 10px 0 0 10px;
+    z-index: 2000;
+  }
+
+  .navbar ul.show {
+    display: flex;
+    animation: slideDown 0.3s ease;
+  }
+
+  @keyframes slideDown {
+    from {
+      opacity: 0;
+      transform: translateY(-10px);
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
+}
+
+
+/* Tambahan */
+
+
+/* === Mini Games - Upgrade Style === */
+.mini-games {
+  padding: 60px 20px 120px;
+  background: linear-gradient(135deg, #0f0c29, #302b63, #24243e);
+  color: #fff;
+  text-align: center;
+  border-radius: 20px;
+  box-shadow: 0 15px 40px rgba(0,0,0,0.5);
+  position: relative;
+  overflow: hidden;
+}
+
+.mini-games h2 {
+  font-size: 36px;
+  color: blue;
+  text-shadow: 0 0 15px blueviolet;
+  margin-bottom: 25px;
+}
+
+/* Glow & hover effect for buttons */
+.game-btn-container .game-btn,
+.game-btn-container2 .game-btn2 {
+  position: relative;
+  display: inline-block;
+  padding: 16px 36px;
+  margin: 10px;
+  font-size: 18px;
+  font-weight: bold;
+  color: #fff;
+  text-decoration: none;
+  border-radius: 12px;
+  background: linear-gradient(135deg, #00ffcc, #0066ff);
+  box-shadow: 0 6px 20px rgba(0,255,204,0.6);
+  transition: all 0.4s ease;
+  overflow: hidden;
+}
+
+.game-btn-container .game-btn::after,
+.game-btn-container2 .game-btn2::after {
+  content: '';
+  position: absolute;
+  top: -50%;
+  left: -50%;
+  width: 200%;
+  height: 200%;
+  background: rgba(255,255,255,0.1);
+  transform: rotate(45deg);
+  transition: all 0.6s ease;
+}
+
+.game-btn-container .game-btn:hover::after,
+.game-btn-container2 .game-btn2:hover::after {
+  top: -20%;
+  left: -20%;
+}
+
+/* Button hover animation */
+.game-btn-container .game-btn:hover,
+.game-btn-container2 .game-btn2:hover {
+  transform: translateY(-6px) scale(1.1);
+  box-shadow: 0 12px 30px rgba(0,255,204,0.8);
+  background: linear-gradient(135deg, #0066ff, #00ffcc);
+}
+
+/* Particles background effect */
+.mini-games::before {
+  content: '';
+  position: absolute;
+  top: 0; left: 0; right: 0; bottom: 0;
+  background: radial-gradient(circle, rgba(0,255,204,0.1) 1px, transparent 1px);
+  background-size: 20px 20px;
+  pointer-events: none;
+  animation: moveParticles 20s linear infinite;
+  z-index: 0;
+}
+
+@keyframes moveParticles {
+  0% { background-position: 0 0; }
+  100% { background-position: 400px 400px; }
+}
+
+/* Ensure buttons are above particle layer */
+.game-btn-container, .game-btn-container2 {
+  position: relative;
+  z-index: 1;
+}
+
+/* jeda */
+/* Grid untuk game cards */
+.mini-games .game-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+  gap: 25px;
+  justify-items: center;
+  margin-top: 30px;
+}
+
+/* Card tiap game */
+.mini-games .game-card {
+  background: rgba(255,255,255,0.05);
+  border-radius: 20px;
+  overflow: hidden;
+  text-align: center;
+  padding: 15px;
+  box-shadow: 0 8px 25px rgba(0,255,204,0.3);
+  transition: transform 0.3s, box-shadow 0.3s;
+}
+
+.mini-games .game-card img {
+  width: 100%;
+  height: 150px;
+  object-fit: cover;
+  border-radius: 15px;
+  margin-bottom: 15px;
+  transition: transform 0.3s;
+}
+
+.mini-games .game-card:hover {
+  transform: translateY(-8px) scale(1.05);
+  box-shadow: 0 15px 40px rgba(0,255,204,0.6);
+}
+
+.mini-games .game-card:hover img {
+  transform: scale(1.1);
+}
+
+/* Tombol di atas gambar */
+.mini-games .game-card .game-btn,
+.mini-games .game-card .game-btn2 {
+  display: inline-block;
+  margin-top: 5px;
+  padding: 12px 28px;
+  font-size: 16px;
+  border-radius: 10px;
+  background: linear-gradient(135deg, #00ffcc, #0066ff);
+  color: #fff;
+  text-decoration: none;
+  box-shadow: 0 5px 15px rgba(0,255,204,0.5);
+  transition: transform 0.3s, box-shadow 0.3s, background 0.3s;
+}
+
+.mini-games .game-card .game-btn:hover,
+.mini-games .game-card .game-btn2:hover {
+  transform: translateY(-4px) scale(1.05);
+  background: linear-gradient(135deg, #0066ff, #00ffcc);
+  box-shadow: 0 8px 25px rgba(0,255,204,0.8);
+}
+
+/* tambahan css spotify */
+
+/* Playlist Card */
+.playlist {
+  background: linear-gradient(135deg, #0d1117, #111827);
+  padding: 60px 20px 100px;
+  border-radius: 20px;
+  box-shadow: 0 15px 30px rgba(0,0,0,0.5);
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+
+.playlist:hover {
+  transform: translateY(-5px) scale(1.02);
+  box-shadow: 0 25px 50px rgba(0,0,0,0.7);
+}
+
+.playlist h2 {
+  color: #00ffcc;
+  font-size: 28px;
+  margin-bottom: 15px;
+  text-shadow: 0 0 10px #00ffcc;
+}
+
+.playlist p {
+  color: #ccc;
+  font-size: 16px;
+  margin-bottom: 25px;
+  opacity: 0.9;
+}
+
+.playlist iframe {
+  border-radius: 15px;
+  border: 2px solid #00ffcc33;
+  box-shadow: 0 10px 25px rgba(0,255,204,0.3);
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+
+.playlist iframe:hover {
+  transform: scale(1.02);
+  box-shadow: 0 15px 35px rgba(0,255,204,0.5);
+}
+
+/* Non dark-mode */
+
+/* === Light Mode Styles === */
+body:not(.dark-mode) {
+  background: #f5f5f5;
+  color: #222;
+}
+
+/* Cards section */
+body:not(.dark-mode) .cards {
+  background: #fff;
+  color: #222;
+}
+
+/* Mini Games section */
+body:not(.dark-mode) .mini-games {
+  background: #fefefe;
+  color: #222;
+  box-shadow: 0 10px 25px rgba(0,0,0,0.1);
+}
+
+/* Playlist section */
+body:not(.dark-mode) .playlist {
+  background: #fff;
+  color: #222;
+  box-shadow: 0 10px 25px rgba(0,0,0,0.1);
+}
+
+body:not(.dark-mode) .playlist h2 {
+  color: #0066ff;
+  text-shadow: none;
+}
+
+body:not(.dark-mode) .playlist iframe {
+  border: 2px solid #0066ff33;
+  box-shadow: 0 10px 25px rgba(0,102,255,0.2);
+}
+
+/* Navbar */
+body:not(.dark-mode) .navbar {
+  background: #111;
+  color: #fff;
+}
+body:not(.dark-mode) .navbar ul li a {
+  color: #fff;
+}
+
+/* Buttons */
+body:not(.dark-mode) .game-btn,
+body:not(.dark-mode) .game-btn2 {
+  background: linear-gradient(135deg, #00ccff, #0066ff);
+  color: #fff;
+}
+
+body:not(.dark-mode) .game-btn:hover,
+body:not(.dark-mode) .game-btn2:hover {
+  background: linear-gradient(135deg, #0066ff, #00ccff);
+}
+
+/* opsional */
+.playlist {
+  position: relative;
+  padding: 80px 20px;
+  text-align: center;
+  background: linear-gradient(120deg, #0d1117, #111827, #0d1117);
+  overflow: hidden;
+  border-radius: 20px;
+  color: #fff;
+}
+
+.playlist h2 {
+  margin-bottom: 15px;
+  font-size: 32px;
+  color: #00ffcc;
+  text-shadow: 0 0 10px #00ffcc55;
+}
+
+.playlist p {
+  margin-bottom: 25px;
+  font-size: 16px;
+  opacity: 0.85;
+}
+
+.playlist-container {
+  position: relative;
+  display: inline-block;
+  width: 100%;
+  max-width: 800px;
+  border-radius: 20px;
+  overflow: hidden;
+  transition: transform 0.3s, box-shadow 0.3s;
+}
+
+.playlist-container:hover {
+  transform: scale(1.02);
+  box-shadow: 0 0 40px #00ffcc77;
+}
+
+.playlist iframe {
+  width: 100%;
+  height: 380px;
+  border: none;
+  border-radius: 20px;
+  position: relative;
+  z-index: 2;
+}
+
+.spotify-btn {
+  display: inline-block;
+  margin-top: 15px;
+  padding: 12px 28px;
+  background: linear-gradient(135deg, #00ffcc, #0066ff);
+  color: #fff;
+  font-weight: bold;
+  border-radius: 12px;
+  text-decoration: none;
+  transition: all 0.3s;
+  z-index: 3;
+  position: relative;
+}
+.spotify-btn:hover {
+  background: linear-gradient(135deg, #0066ff, #00ffcc);
+  transform: translateY(-3px) scale(1.05);
+  box-shadow: 0 6px 15px rgba(0,255,204,0.6);
+}
+
+/* Particles canvas */
+#spotifyParticles {
+  position: absolute;
+  top: 0; left: 0;
+  width: 100%; height: 100%;
+  pointer-events: none;
+  z-index: 1;
+}
+
+/* Transparan */
+.spotify-btn {
+  display: inline-block;
+  margin-top: 15px;
+  padding: 12px 28px;
+  background: rgba(255, 255, 255, 0.0); /* transparan */
+  color: #00ffcc; /* warna tulisan sesuai tema */
+  font-weight: bold;
+  border-radius: 12px;
+  text-decoration: none;
+  transition: all 0.3s;
+  z-index: 3;
+  position: relative;
+  border: 2px solid #00ffcc; /* optional, bisa dihilangkan jika ingin polos */
+  backdrop-filter: blur(4px); /* efek blur supaya tulisan lebih jelas */
+}
+
+.spotify-btn:hover {
+  transform: translateY(-3px) scale(1.05);
+  box-shadow: 0 6px 15px rgba(0,255,204,0.6);
+  border-color: #00ffe0;
+}
+
+  </style>
+</head>
+<body>
+
+  <div id="overlay">Threelogy Class L3</div>
+
+  <nav class="navbar">
+    <h1><span>Threelogy</span> Class L3</h1>
+    <ul>
+      <li><a href="#">Beranda</a></li>
+      <li><a href="profile2.html">Profil Kelas</a></li>
+      <li><a href="Anggota.html">Anggota</a></li>
+      <li><a href="ceritabersama.html">Blog</a></li>
+    </ul>
+
+    <!-- Switch Toggle -->
+    <label class="toggle-container">
+      <input type="checkbox" id="themeToggle" checked>
+      <span class="slider"></span>
+    </label>
+  </nav>
+
+  <section class="hero">
+    <img class="heroSlide active" src="main-foto.jpg" alt="Foto Kelas L3" />
+    <img class="heroSlide" src="main-foto2.2.jpg" alt="Foto Kelas L3" />
+    <img class="heroSlide" src="fasilkom.jpg" alt="Foto Kelas L3" />
+    <div class="hero-text">
+      <h2 id="heroTitle"></h2>
+      <p id="heroSubtitle"></p>
+    </div>
+  </section>
+
+  <section class="cards">
+    <div class="card">
+      <img src="https://cdn-icons-png.flaticon.com/512/3135/3135715.png" />
+      <h2><a href="Anggota.html"> Anggota</a></h2>
+      <p>Lihat biodata lengkap teman-teman kelas.</p>
+    </div>
+    <div class="card">
+      <img src="https://cdn-icons-png.flaticon.com/512/847/847969.png" alt="Kegiatan" />
+      <h2><a href ="kegiatankelas.html">Kegiatan Kelas</a></h2>
+      <p>Dokumentasi event dan kegiatan bersama.</p>
+    </div>
+    <div class="card">
+      <img src="https://cdn-icons-png.flaticon.com/512/893/893257.png" alt="Comment" />
+      <h2><a href = "comment.html">Comment</a></h2>
+      <p>Kirim Pesan mu di sini</p>
+    </div>
+    <div class="card">
+      <img src="https://img.icons8.com/ios-filled/100/000000/retro-tv.png" />
+      <h2><a href="film.html">Movie</a></h2>
+      <p>Recap Movie</p>
+    </div>
+  </section>
+
+ <section class="map-section">
+  <h2>Fasilkom UNSRI Indralaya</h2>
+ <iframe src="https://www.google.com/maps/embed?pb=!1m16!1m12!1m3!1d3983.51998443043!2d104.6490074735349!3d-3.219816546755314!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!2m1!1sfasilkom%20unsri%20indralaya!5e0!3m2!1sid!2sid!4v1761376351716!5m2!1sid!2sid" 
+ width="600" 
+ height="450" 
+ style="border:0;" 
+ allowfullscreen="" 
+ loading="lazy" 
+ referrerpolicy="no-referrer-when-downgrade">
+</iframe>
+</section>
+
+
+
+  <!-- 🎮 Mini Games -->
+  <section class="mini-games">
+  <h2>Mini Games</h2>
+  <div class="game-grid">
+    <div class="game-card">
+      <img src="fluffy bird.jpg" alt="Game 1" />
+      <a href="mini game.html" class="game-btn">🎮 fluffy bird</a>
+    </div>
+    <div class="game-card">
+      <img src="rsyidadv.jpg.png" alt="Game 2" />
+      <a href="simple game.html" class="game-btn2">🎮 Rasyid Adventure</a>
+    </div>
+  </div>
+</section>
+
+
+  <!-- 🎵 Spotify Playlist -->
+<section class="playlist">
+  <h2>🎶 Playlist Musik Kelas L3</h2>
+  <p>Nikmati lagu favorit kelas L3 sambil belajar atau bersantai 😎</p>
+
+  <div class="playlist-container">
+    <iframe
+      src="https://open.spotify.com/embed/playlist/6Lmj0WVlc4kU8jaQwlsTF9?utm_source=generator"
+      frameborder="0"
+      allow="autoplay; clipboard-write; encrypted-media; fullscreen; picture-in-picture"
+      loading="lazy">
+    </iframe>
+    <a href="https://open.spotify.com/playlist/6Lmj0WVlc4kU8jaQwlsTF9" target="_blank" class="spotify-btn">
+      Buka Playlist di Spotify
+    </a>
+    <canvas id="spotifyParticles"></canvas>
+  </div>
+</section>
+  <footer>
+    <p>&copy; 2025 Threelogy Class L3 | By Rasyid</p>
+  </footer>
+
+  <script>
+    const heroTitle = document.getElementById("heroTitle");
+    const heroSubtitle = document.getElementById("heroSubtitle");
+    const titleText = "Selamat Datang di Kelas L3";
+    const subtitleText = "Bgadang bukan lah pilihan";
+    let i = 0, j = 0;
+    function typeTitle() {
+      if (i < titleText.length) {
+        heroTitle.textContent += titleText.charAt(i);
+        i++;
+        setTimeout(typeTitle, 80);
+      } else { setTimeout(typeSubtitle, 400); }
+    }
+    function typeSubtitle() {
+      if (j < subtitleText.length) {
+        heroSubtitle.textContent += subtitleText.charAt(j);
+        j++;
+        setTimeout(typeSubtitle, 50);
+      }
+    }
+
+    const slides = document.querySelectorAll(".heroSlide");
+    let currentSlide = 0;
+    function nextSlide() {
+      slides[currentSlide].classList.remove("active");
+      currentSlide = (currentSlide + 1) % slides.length;
+      slides[currentSlide].classList.add("active");
+    }
+    setInterval(nextSlide, 5000);
+
+    const reveals = document.querySelectorAll(".card, .map-section, .playlist, .mini-games, .game-btn-container, .game-btn-container2");
+    function scrollReveal() {
+      const windowHeight = window.innerHeight;
+      reveals.forEach(el => {
+        const revealTop = el.getBoundingClientRect().top;
+        const revealBottom = el.getBoundingClientRect().bottom;
+        if (revealTop < windowHeight - 100 && revealBottom > 0) {
+          el.classList.add("show");
+        } else {
+          el.classList.remove("show");
+        }
+      });
+    }
+    window.addEventListener("scroll", scrollReveal);
+    window.addEventListener("load", scrollReveal);
+
+    const overlay = document.getElementById("overlay");
+    window.addEventListener("scroll", () => {
+      if (!overlay.classList.contains("hidden")) overlay.classList.add("hidden");
+    });
+
+    const themeToggle = document.getElementById("themeToggle");
+    const body = document.body;
+    body.classList.add("dark-mode");
+    themeToggle.checked = true;
+
+    themeToggle.addEventListener("change", () => {
+      if (themeToggle.checked) {
+        body.classList.add("dark-mode");
+      } else {
+        body.classList.remove("dark-mode");
+      }
+    });
+
+    window.onload = typeTitle;
+
+    // === 📱 Hamburger Menu ===
+const hamburger = document.createElement("div");
+hamburger.classList.add("hamburger");
+hamburger.innerHTML = `
+  <span></span>
+  <span></span>
+  <span></span>
+`;
+document.querySelector(".navbar").appendChild(hamburger);
+
+const navMenu = document.querySelector(".navbar ul");
+hamburger.addEventListener("click", () => {
+  hamburger.classList.toggle("active");
+  navMenu.classList.toggle("show");
+});
+
+const canvas = document.getElementById("spotifyParticles");
+const ctx = canvas.getContext("2d");
+let particlesArray = [];
+
+function resizeCanvas() {
+  canvas.width = canvas.offsetWidth;
+  canvas.height = canvas.offsetHeight;
+}
+window.addEventListener("resize", resizeCanvas);
+resizeCanvas();
+
+class Particle {
+  constructor() {
+    this.x = Math.random() * canvas.width;
+    this.y = Math.random() * canvas.height;
+    this.size = Math.random() * 4 + 1;
+    this.speedY = Math.random() * 1 + 0.5;
+    this.color = `rgba(0, 255, 204, ${Math.random()})`;
+  }
+  update() {
+    this.y -= this.speedY;
+    if (this.y < 0) this.y = canvas.height;
+  }
+  draw() {
+    ctx.beginPath();
+    ctx.arc(this.x, this.y, this.size, 0, Math.PI*2);
+    ctx.fillStyle = this.color;
+    ctx.fill();
+  }
+}
+
+function initParticles() {
+  particlesArray = [];
+  for (let i = 0; i < 80; i++) {
+    particlesArray.push(new Particle());
+  }
+}
+initParticles();
+
+function animateParticles() {
+  ctx.clearRect(0,0,canvas.width, canvas.height);
+  particlesArray.forEach(p => { p.update(); p.draw(); });
+  requestAnimationFrame(animateParticles);
+}
+animateParticles();
+  </script>
+</body>
+</html>
