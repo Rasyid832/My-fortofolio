@@ -1,1 +1,335 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Pedro Fernandes — Portfolio</title>
+  <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@300;400;600;700;800&display=swap" rel="stylesheet">
 
+  <style>
+    :root{
+      --bg:#221a23;
+      --panel:#2a232a;
+      --accent:#c45943;
+      --muted:#bfb5b8;
+      --glass: rgba(255,255,255,0.03);
+    }
+
+    *{box-sizing:border-box}
+    html,body{height:100%}
+    body{
+      margin:0;
+      font-family: 'Montserrat', system-ui, -apple-system, 'Segoe UI', Roboto, 'Helvetica Neue', Arial;
+      background: radial-gradient(1200px 400px at 80% 80%, rgba(196,89,67,0.12), transparent 10%),
+                  radial-gradient(800px 300px at 10% 10%, rgba(80,74,91,0.14), transparent 10%), var(--bg);
+      color:#e9e6e8;
+      -webkit-font-smoothing:antialiased;
+      -moz-osx-font-smoothing:grayscale;
+      padding:40px;
+    }
+
+    .container{
+      max-width:1200px;
+      margin:0 auto;
+      display:grid;
+      grid-template-columns: 280px 1fr;
+      gap:48px;
+      align-items:start;
+    }
+
+    /* SIDEBAR */
+    .sidebar{
+      padding-left:20px;
+      position:sticky;
+      top:40px;
+      height:calc(100vh - 80px);
+      display:flex;
+      flex-direction:column;
+      justify-content:flex-start;
+    }
+
+    .brand{ margin-bottom:32px; }
+    .brand h1{margin:0;font-size:20px;letter-spacing:0.2px}
+    .brand p{margin:4px 0 0;color:var(--muted);font-size:14px}
+
+    nav{margin-top :8px}
+    nav ul{list-style:none;padding:0;margin:0}
+    nav li{margin:12px 0;font-size:16px;color:var(--muted);cursor:pointer;transition:color 0.3s}
+    nav li.active{color:#fff;border-left:3px solid var(--muted);padding-left:18px}
+    nav li:hover{color:#fff}
+
+    /* Profile */
+    .profile-card{
+      margin-top:-2px;
+      width:210px;
+      background:linear-gradient(180deg, rgba(196,89,67,0.14), rgba(196,89,67,0.08));
+      border-radius:26px;
+      padding:16px;
+      box-shadow: 0 8px 30px rgba(0,0,0,0.5) inset;
+      display:flex;
+      justify-content:center;
+      align-items:center;
+      opacity:0;
+      transform:translateY(40px);
+      transition:all 0.8s ease;
+     
+    }
+    .profile-card.show{opacity:1;transform:translateY(0);}
+    .photo-wrap{
+      width:100%;
+      border-radius:18px;
+      overflow:hidden;
+      border:10px solid var(--accent);
+      box-shadow: 0 16px 0 rgba(196,89,67,0.08);
+    }
+    .photo-wrap img{display:block;width:100%;height:auto;}
+
+    /* RIGHT CONTENT */
+    .content{ padding:8px 24px 40px 24px; }
+
+    header.topbar{
+      display:flex;
+      justify-content:flex-end;
+      gap:18px;
+      align-items:center;
+      margin-bottom:28px
+    }
+
+    .btn{
+      background:var(--accent);
+      color:#fff;
+      padding:12px 22px;
+      border-radius:28px;
+      border:none;
+      font-weight:700;
+      cursor:pointer;
+      box-shadow:0 8px 20px rgba(196,89,67,0.14);
+    }
+
+    .link-cv{
+      color:var(--muted);
+      text-decoration:none;
+      border-bottom:2px solid rgba(255,255,255,0.06);
+      padding-bottom:6px
+    }
+
+    section{
+      padding:18px 0;
+      opacity:0;
+      transform:translateY(40px);
+      transition:all 0.8s ease;
+    }
+
+    section.show{opacity:1;transform:translateY(0);}
+
+    .section-head{
+      display:flex;
+      align-items:center;
+      gap:18px;
+      margin-bottom:18px
+    }
+
+    .section-head .title-small{color:var(--accent);font-weight:600}
+    .section-head .line{flex:1;height:2px;background:linear-gradient(90deg,var(--accent),rgba(255,255,255,0.02));border-radius:2px}
+
+    h2.big{font-size:44px;line-height:1.05;margin:6px 0 18px}
+    p.lead{color:var(--muted);max-width:740px}
+    .btn-cta{display:inline-block;margin-top:18px;background:var(--accent);padding:14px 26px;border-radius:28px;font-weight:700}
+
+    /* Service boxes */
+    .services{display:flex;flex-direction:column;gap:18px;margin-top:22px}
+    .service-item{background:linear-gradient(90deg, rgba(196,89,67,0.18), rgba(196,89,67,0.12));padding:18px;border-radius:40px;font-weight:600}
+
+    /* Experience */
+    .exp-list{display:flex;flex-direction:column;gap:16px}
+    .exp-item{border:1px solid rgba(196,89,67,0.22);padding:20px;border-radius:14px}
+
+    /* Skills */
+    .skills-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:18px;margin-top:18px}
+    .skill-box{border:1px solid rgba(196,89,67,0.22);padding:26px;border-radius:14px;text-align:center}
+
+    /* Contact */
+    .contact-form{
+      border:1px solid rgba(196,89,67,0.22);
+      padding:24px;
+      border-radius:18px;
+      background:linear-gradient(180deg, rgba(255,255,255,0.01), rgba(255,255,255,0.00));
+    }
+
+    label{display:block;margin-bottom:8px;color:var(--muted);font-size:14px}
+    input[type=text],input[type=email],textarea{
+      width:100%;
+      padding:14px;
+      border-radius:10px;
+      border:none;
+      background:rgba(0,0,0,0.25);
+      color:#fff;
+      margin-bottom:14px
+    }
+    textarea{min-height:160px;resize:vertical}
+
+    footer{margin-top:40px;color:var(--muted)}
+
+    /* Responsive */
+    @media (max-width:980px){
+      .container{grid-template-columns:1fr;gap:24px}
+      .sidebar{position:static;height:auto;display:flex;flex-direction:row;align-items:center;gap:18px}
+      .brand{flex:1}
+      nav{order:2}
+      .profile-card{display:none}
+    }
+  </style>
+</head>
+
+<body>
+  <div class="container">
+    <aside class="sidebar">
+      <div class="brand">
+        <h1>Rasyid Ridho</h1>
+        <p>frontend&nbsp;&nbsp;Developer</p>
+      </div>
+
+      <nav>
+        <ul id="navList">
+          <li data-target="intro" class="active">Introduction</li>
+          <li data-target="about">About me</li>
+          <li data-target="service">Service</li>
+          <li data-target="experience">Experience</li>
+          <li data-target="skills">Skills</li>
+          <li data-target="contact">Contact</li>
+        </ul>
+      </nav>
+
+      <div class="profile-card">
+        <div class="photo-wrap">
+          <img src="me2.jpg" alt="profile">
+        </div>
+      </div>
+    </aside>
+
+    <main class="content">
+      <header class="topbar">
+        <a class="link-cv" href="#">Download my CV</a>
+        <button class="btn">Get in touch</button>
+      </header>
+
+      <section id="about">
+        <div class="section-head">
+          <div class="title-small">About me</div>
+          <div class="line"></div>
+        </div>
+        <h2 class="big">Hello! I'm Muhammad Rasyid Ridho, an Informatics Student of Sriwijaya University.</h2>
+        <p class="lead">I'm a proffesional frontend Developer and designer of ui/ux.</p>
+        <a class="btn-cta" href="#about">MORE ABOUT ME</a>
+      </section>
+
+      <section id="service">
+        <div class="section-head">
+          <div class="title-small">Service</div>
+          <div class="line"></div>
+        </div>
+        <h2 class="big">I offer a wide range of amazing service for your Project</h2>
+        <p class="lead">Frontend developer is professionals who build the interface (appearance) part of a website or application that interacts directly with users.</p>
+        <div class="services">
+          <div class="service-item">01. Web Oriented</div>
+          <div class="service-item">02. Application Developer</div>
+          <div class="service-item">03. Web developer</div>
+        </div>
+      </section>
+
+      <section id="experience">
+        <div class="section-head">
+          <div class="title-small">Experience</div>
+          <div class="line"></div>
+        </div>
+        <h2 class="big">In my work I draw on years of experience as a business developer.</h2>
+        <p class="lead">A graphic designer is a professional within the graphic design and graphic arts industry who assembles together images, typography, or motion graphics to create a piece of design.</p>
+        <div class="exp-list">
+          <div class="exp-item">A graphic designer is a professional within the graphic design and graphic arts industry who assembles together images.</div>
+          <div class="exp-item">A graphic designer is a professional within the graphic design and graphic arts industry who assembles together images.</div>
+          <div class="exp-item">A graphic designer is a professional within the graphic design and graphic arts industry who assembles together images.</div>
+        </div>
+      </section>
+
+      <section id="skills">
+        <div class="section-head">
+          <div class="title-small">Skills</div>
+          <div class="line"></div>
+        </div>
+        <h2 class="big">My Skills</h2>
+        <p class="lead">A graphic designer is a professional within the graphic design and graphic arts industry who assembles together images, typography, or motion graphics to create a piece of design.</p>
+
+        <h3 style="margin-top:20px">My Skillset</h3>
+        <div class="skills-grid">
+          <div class="skill-box"><div style="font-weight:700;font-size:18px"></div><div style="color:var(--muted);margin-top:6px">Subtitle</div></div>
+          <div class="skill-box"><div style="font-weight:700;font-size:18px">Skill 2</div><div style="color:var(--muted);margin-top:6px">Subtitle</div></div>
+          <div class="skill-box"><div style="font-weight:700;font-size:18px">Skill 3</div><div style="color:var(--muted);margin-top:6px">Subtitle</div></div>
+          <div class="skill-box"><div style="font-weight:700;font-size:18px">Skill 4</div><div style="color:var(--muted);margin-top:6px">Subtitle</div></div>
+        </div>
+
+        <h3 style="margin-top:30px">Toolset</h3>
+        <div class="skills-grid" style="grid-template-columns:repeat(2,1fr);">
+          <div class="skill-box">Tool 1<br><small style="color:var(--muted)">Subtitle</small></div>
+          <div class="skill-box">Tool 2<br><small style="color:var(--muted)">Subtitle</small></div>
+        </div>
+      </section>
+
+      <section id="contact">
+        <div class="section-head">
+          <div class="title-small">Contact</div>
+          <div class="line"></div>
+        </div>
+        <h2 class="big">Contact</h2>
+        <p class="lead">A graphic designer is a professional within the graphic design and graphic arts industry who assembles together images, typography, or motion graphics to create a piece of design.</p>
+        <div class="contact-form">
+          <label for="name">Name</label>
+          <input id="name" type="text" placeholder="Your name">
+          <label for="email">Email</label>
+          <input id="email" type="email" placeholder="you@example.com">
+          <label for="message">Message</label>
+          <textarea id="message" placeholder="Write your message..."></textarea>
+          <button class="btn" style="margin-top:6px">Send message</button>
+        </div>
+      </section>
+
+      <footer><small>© Pedro Fernandes • All rights reserved</small></footer>
+    </main>
+  </div>
+
+  <!-- SCRIPT -->
+  <script>
+    const nav = document.getElementById('navList');
+    const items = nav.querySelectorAll('li');
+    const sections = ['intro','about','service','experience','skills','contact'];
+
+    items.forEach(it=>{
+      it.addEventListener('click', ()=>{
+        const t = it.dataset.target;
+        document.getElementById(t).scrollIntoView({behavior:'smooth', block:'start'});
+        items.forEach(i=>i.classList.remove('active'));
+        it.classList.add('active');
+      });
+    });
+
+    const sectionEls = sections.map(id=>document.getElementById(id));
+    window.addEventListener('scroll', ()=>{
+      let idx = 0;
+      for(let i=0;i<sectionEls.length;i++){
+        const rect = sectionEls[i].getBoundingClientRect();
+        if(rect.top <= 120) idx = i;
+      }
+      items.forEach(i=>i.classList.remove('active'));
+      items[idx].classList.add('active');
+    });
+
+    // Efek muncul
+    const observer = new IntersectionObserver(entries=>{
+      entries.forEach(e=>{
+        if(e.isIntersecting) e.target.classList.add('show');
+      });
+    },{threshold:0.2});
+
+    document.querySelectorAll('section, .profile-card').forEach(el=>observer.observe(el));
+  </script>
+</body>
+</html>
