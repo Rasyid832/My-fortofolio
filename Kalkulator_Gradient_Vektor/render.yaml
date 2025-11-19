@@ -1,0 +1,9 @@
+services:
+  - type: web
+    name: kalkulator-gradien
+    env: docker
+    plan: free
+    dockerfilePath: ./Dockerfile
+    autoDeploy: true
+    domains:
+      - Kelompok11.onrender.com
