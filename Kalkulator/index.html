@@ -1,1 +1,222 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Kalkulator Gradien & Bidang Singgung</title>
+
+  <style>
+    * { box-sizing: border-box; font-family: 'Poppins', sans-serif; }
+    body {
+      margin: 0; min-height: 100vh;
+      background: linear-gradient(135deg, #0f172a, #1e1b4b);
+      display: flex; justify-content: center; align-items: center;
+      color: #fff;
+    }
+
+    .card {
+      background: rgba(255, 255, 255, 0.08);
+      padding: 35px; border-radius: 20px;
+      width: 400px; box-shadow: 0 8px 40px rgba(0,0,0,0.4);
+      backdrop-filter: blur(12px);
+      animation: fadeIn 0.8s ease-in-out;
+      text-align: center;
+    }
+
+    h2 { color: #60a5fa; margin-bottom: 20px; }
+    input, select {
+      width: 100%; padding: 12px; margin: 8px 0;
+      border: none; border-radius: 10px;
+      background: rgba(255,255,255,0.15);
+      color: #fff; font-size: 1em; outline: none;
+    }
+    button {
+      width: 100%; padding: 12px; margin-top: 12px;
+      border: none; border-radius: 10px;
+      background: linear-gradient(90deg, #3b82f6, #60a5fa);
+      color: #fff; font-weight: bold; cursor: pointer;
+      transition: 0.2s;
+    }
+    button:hover { transform: translateY(-2px); }
+
+    #hasil {
+      margin-top: 15px; text-align: left;
+      background: rgba(255,255,255,0.12);
+      padding: 15px; border-radius: 10px;
+      font-size: 0.95em; color: #86efac; white-space: pre-line;
+    }
+
+    @keyframes fadeIn {
+      from {opacity:0; transform:translateY(-10px);}
+      to {opacity:1; transform:translateY(0);}
+    }
+
+    /* --- Logo UNSRI --- */
+    .logo {
+      display: block;
+      width: 90px;
+      margin: 0 auto 10px auto;
+    }
+
+    /* --- Halo Nama --- */
+    .halo {
+      text-align: center;
+      font-size: 15px;
+      margin-top: 5px;
+      margin-bottom: 10px;
+      font-weight: bold;
+      color:goldenrod;
+    }
+
+    /* sembunyikan kalkulator dulu */
+    #kalkulator { display: none; }
+  </style>
+</head>
+
+<body>
+
+  <!-- =======================
+          LOGIN PAGE
+  ======================== -->
+  <div class="card" id="login">
+    <h2>🔐 Login Mahasiswa </h2>
+    <input id="nama" placeholder="Masukkan Nama Lengkap...">
+    <input id="nim" placeholder="Masukkan NIM...">
+    <button onclick="login()">Masuk</button>
+    <p id="loginError" style="color:#f87171; margin-top:10px;"></p>
+  </div>
+
+  <!-- =======================
+        KALKULATOR PAGE
+  ======================== -->
+  <div class="card" id="kalkulator">
+    <img 
+      src="https://th.bing.com/th/id/R.7545b55b9d17b1070e2c884ffa6858fd?rik=3D80%2fEg6i9TK2A&riu=http%3a%2f%2f1.bp.blogspot.com%2f-P8KJ9GPI9ds%2fT9QrVuX-ycI%2fAAAAAAAAK3g%2fdW9fIbMoO14%2fs1600%2flogo%2bunsri.png&ehk=9XoxwvoaYfdUgOg7B0UHZJ0FrOEQIEK%2fiOrPBfmqUgE%3d&risl=&pid=ImgRaw&r=0"
+      class="logo"
+      alt="Logo UNSRI"
+    >
+
+    <p class="halo" id="haloNama">Halo, …</p>
+
+    <h2>🧮 Gradien & Bidang Singgung</h2>
+
+    <input id="fx" placeholder="Masukkan fungsi, contoh: x*y + z^2">
+    <input id="x" type="number" placeholder="Nilai x">
+    <input id="y" type="number" placeholder="Nilai y">
+    <input id="z" type="number" placeholder="Nilai z">
+
+    <button onclick="hitung()">Hitung</button>
+
+    <pre id="hasil"></pre>
+  </div>
+
+  <script>
+
+    /* ========================
+            DATA USER
+    ========================= */
+    const users = {
+      "Muhammad Rasyid Ridho":"09021282530095",
+      "Tuah Shahjahan Arzu":"09021282530084",
+      "Noufal Izdihar": "09021282530093",
+      "Raditya Derry Armadani": "09021282530094",
+      "Dhea Aurellia": "09021282530075",
+      "Muhammad Arya Putra Satria": "09021282530077",
+      "Laudia Zahratus Sita": "09021282530085",
+      "Duhairillah": "09021282530092",
+      "Sulivan Cahyadi": "09021282530111",
+      "Aqila Rafif Masrian": "09021282530080",
+      "Shakilla Marsya": "09021282530086",
+      "Ega Asliya Putri": "09021282530098",
+      "Adrina Ginata Dinda Harjanti": "09021282530104",
+      "Verizka Primallea Gustikanayla": "09021282530105",
+      "Jihan Faraza Melka": "09021282530073",
+      "Muhammad Nabil Imtiyaz": "09021282530116",
+      "Alfinandra Rashyid Pratama": "09021282530115",
+      "Muhammad Raffa Al Ra'uf": "09021282530112",
+      "Chanda Putri Zahira": "09021282530110",
+      "Rifai Pideksa Sinulingga": "09021282530109",
+      "Pijar Yefa Tri Putra": "09021282530108",
+      "Muhammad Bolkiah Ayesha Alfarizi Asyari": "09021282530106",
+      "Shafin Maulana": "09021282530103",
+      "Muhammad Ajhar Rizqi Hidayatullah": "09021282530101",
+      "Muhammad Farhan Hidayat": "09021282530097",
+      "Muhammad Rayyan Alfarabi A": "09021282530096",
+      "Raditya Ihsan": "09021282530091",
+      "Muhammad Rochman": "09021282530079",
+      "Rizky Aditya Kairupan": "09021282530090",
+      "Endry Julyan Putra": "09021282530089",
+      "Aditiah Okta Romadhon": "09021282530088",
+      "Achmad Daniel Albar": "09021282530078"
+    };
+
+    /* ========================
+            LOGIN
+    ========================= */
+    function login() {
+      const nama = document.getElementById("nama").value.trim();
+      const nim = document.getElementById("nim").value.trim();
+      const error = document.getElementById("loginError");
+
+      if (users[nama] === nim) {
+
+        // tampilkan nama di halo
+        document.getElementById("haloNama").innerText = "Halo, " + nama + "!";
+
+        // tampilkan kalkulator
+        document.getElementById("login").style.display = "none";
+        document.getElementById("kalkulator").style.display = "block";
+        error.innerText = "";
+
+      } else {
+        error.innerText = "❌ Nama atau NIM salah!";
+      }
+    }
+
+
+    /* ==========================
+            HITUNG SERVER
+    =========================== */
+    async function hitung() {
+      const fx = document.getElementById("fx").value;
+      const x = parseFloat(document.getElementById("x").value);
+      const y = parseFloat(document.getElementById("y").value);
+      const z = parseFloat(document.getElementById("z").value);
+      const hasilDiv = document.getElementById("hasil");
+
+      hasilDiv.innerText = "Menghitung...";
+
+      try {
+        const response = await fetch("/hitung", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ fx, x, y, z })
+        });
+
+        const hasil = await response.json();
+
+        if (hasil.error) {
+          hasilDiv.innerText = "⚠️ Error: " + hasil.error;
+          hasilDiv.style.color = "#f87171";
+          return;
+        }
+
+        hasilDiv.style.color = "#86efac";
+        hasilDiv.innerText =
+          `f(x, y, z) = ${hasil.fxyz.toFixed(4)}\n` +
+          `∂f/∂x = ${hasil.dfdx.toFixed(4)}\n` +
+          `∂f/∂y = ${hasil.dfdy.toFixed(4)}\n` +
+          `∂f/∂z = ${hasil.dfdz.toFixed(4)}\n\n` +
+          `Persamaan Bidang Singgung:\n${hasil.bidang}`;
+
+      } catch (err) {
+        hasilDiv.innerText = "🚫 Gagal terhubung ke server.";
+        hasilDiv.style.color = "#f87171";
+      }
+    }
+
+  </script>
+
+</body>
+</html>
 
