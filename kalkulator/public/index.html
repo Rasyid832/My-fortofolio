@@ -105,110 +105,111 @@
 
     <pre id="hasil"></pre>
   </div>
+      <script>
 
-  <script>
+  /* ========================
+          DATA USER
+  ========================= */
+  const users = {
+    "Muhammad Rasyid Ridho":"09021282530095",
+    "Tuah Shahjahan Arzu":"09021282530084",
+    "Noufal Izdihar": "09021282530093",
+    "Raditya Derry Armadani": "09021282530094",
+    "Dhea Aurellia": "09021282530075",
+    "Muhammad Arya Putra Satria": "09021282530077",
+    "Laudia Zahratus Sita": "09021282530085",
+    "Duhairillah": "09021282530092",
+    "Sulivan Cahyadi": "09021282530111",
+    "Aqila Rafif Masrian": "09021282530080",
+    "Shakilla Marsya": "09021282530086",
+    "Ega Asliya Putri": "09021282530098",
+    "Adrina Ginata Dinda Harjanti": "09021282530104",
+    "Verizka Primallea Gustikanayla": "09021282530105",
+    "Jihan Faraza Melka": "09021282530073",
+    "Muhammad Nabil Imtiyaz": "09021282530116",
+    "Alfinandra Rashyid Pratama": "09021282530115",
+    "Muhammad Raffa Al Ra'uf": "09021282530112",
+    "Chanda Putri Zahira": "09021282530110",
+    "Rifai Pideksa Sinulingga": "09021282530109",
+    "Pijar Yefa Tri Putra": "09021282530108",
+    "Muhammad Bolkiah Ayesha Alfarizi Asyari": "09021282530106",
+    "Shafin Maulana": "09021282530103",
+    "Muhammad Ajhar Rizqi Hidayatullah": "09021282530101",
+    "Muhammad Farhan Hidayat": "09021282530097",
+    "Muhammad Rayyan Alfarabi A": "09021282530096",
+    "Raditya Ihsan": "09021282530091",
+    "Muhammad Rochman": "09021282530079",
+    "Rizky Aditya Kairupan": "09021282530090",
+    "Endry Julyan Putra": "09021282530089",
+    "Aditiah Okta Romadhon": "09021282530088",
+    "Achmad Daniel Albar": "09021282530078"
+  };
 
-    /* ========================
-            DATA USER
-    ========================= */
-    const users = {
-      "Muhammad Rasyid Ridho":"09021282530095",
-      "Tuah Shahjahan Arzu":"09021282530084",
-      "Noufal Izdihar": "09021282530093",
-      "Raditya Derry Armadani": "09021282530094",
-      "Dhea Aurellia": "09021282530075",
-      "Muhammad Arya Putra Satria": "09021282530077",
-      "Laudia Zahratus Sita": "09021282530085",
-      "Duhairillah": "09021282530092",
-      "Sulivan Cahyadi": "09021282530111",
-      "Aqila Rafif Masrian": "09021282530080",
-      "Shakilla Marsya": "09021282530086",
-      "Ega Asliya Putri": "09021282530098",
-      "Adrina Ginata Dinda Harjanti": "09021282530104",
-      "Verizka Primallea Gustikanayla": "09021282530105",
-      "Jihan Faraza Melka": "09021282530073",
-      "Muhammad Nabil Imtiyaz": "09021282530116",
-      "Alfinandra Rashyid Pratama": "09021282530115",
-      "Muhammad Raffa Al Ra'uf": "09021282530112",
-      "Chanda Putri Zahira": "09021282530110",
-      "Rifai Pideksa Sinulingga": "09021282530109",
-      "Pijar Yefa Tri Putra": "09021282530108",
-      "Muhammad Bolkiah Ayesha Alfarizi Asyari": "09021282530106",
-      "Shafin Maulana": "09021282530103",
-      "Muhammad Ajhar Rizqi Hidayatullah": "09021282530101",
-      "Muhammad Farhan Hidayat": "09021282530097",
-      "Muhammad Rayyan Alfarabi A": "09021282530096",
-      "Raditya Ihsan": "09021282530091",
-      "Muhammad Rochman": "09021282530079",
-      "Rizky Aditya Kairupan": "09021282530090",
-      "Endry Julyan Putra": "09021282530089",
-      "Aditiah Okta Romadhon": "09021282530088",
-      "Achmad Daniel Albar": "09021282530078"
-    };
-
-    /* ========================
+  /* ========================
             LOGIN
-    ========================= */
-    function login() {
-      const nama = document.getElementById("nama").value.trim();
-      const nim = document.getElementById("nim").value.trim();
-      const error = document.getElementById("loginError");
+  ========================= */
+  function login() {
+    const nama = document.getElementById("nama").value.trim();
+    const nim = document.getElementById("nim").value.trim();
+    const error = document.getElementById("loginError");
 
-      if (users[nama] === nim) {
-        document.getElementById("haloNama").innerText = "Halo, " + nama + "!";
-        document.getElementById("login").style.display = "none";
-        document.getElementById("kalkulator").style.display = "block";
-        error.innerText = "";
-      } else {
-        error.innerText = "❌ Nama atau NIM salah!";
-      }
+    if (users[nama] === nim) {
+      document.getElementById("haloNama").innerText = "Halo, " + nama + "!";
+      document.getElementById("login").style.display = "none";
+      document.getElementById("kalkulator").style.display = "block";
+      error.innerText = "";
+    } else {
+      error.innerText = "❌ Nama atau NIM salah!";
     }
+  }
 
+  /* ============================
+        EKSPRESI MATH JS
+  =============================*/
+  function evaluate(expr, x, y, z) {
+    return Function("x", "y", "z", `return ${expr};`)(x, y, z);
+  }
 
-    /* ========================
-      PERHITUNGAN (Versi Java)
-    ========================= */
-    function evalFx(fx, x, y, z) {
-      return math.evaluate(fx, { x, y, z });
-    }
+  /* ============================
+        HITUNG GRADIENT + BIDANG
+  =============================*/
+  function hitung() {
+    const fx = document.getElementById("fx").value;
+    const x = parseFloat(document.getElementById("x").value);
+    const y = parseFloat(document.getElementById("y").value);
+    const z = parseFloat(document.getElementById("z").value);
+    const hasil = document.getElementById("hasil");
 
-    function hitung() {
-      const fx = document.getElementById("fx").value;
-      const x = parseFloat(document.getElementById("x").value);
-      const y = parseFloat(document.getElementById("y").value);
-      const z = parseFloat(document.getElementById("z").value);
-      const hasilDiv = document.getElementById("hasil");
-
+    try {
       const h = 0.0001;
 
-      try {
-        // turunan numerik pusat
-        const dfdx = (evalFx(fx, x+h, y, z) - evalFx(fx, x-h, y, z)) / (2*h);
-        const dfdy = (evalFx(fx, x, y+h, z) - evalFx(fx, x, y-h, z)) / (2*h);
-        const dfdz = (evalFx(fx, x, y, z+h) - evalFx(fx, x, y, z-h)) / (2*h);
+      const fxyz = evaluate(fx, x, y, z);
 
-        const fxyz = evalFx(fx, x, y, z);
+      const dfdx = (evaluate(fx, x + h, y, z) - evaluate(fx, x - h, y, z)) / (2 * h);
+      const dfdy = (evaluate(fx, x, y + h, z) - evaluate(fx, x, y - h, z)) / (2 * h);
+      const dfdz = (evaluate(fx, x, y, z + h) - evaluate(fx, x, y, z - h)) / (2 * h);
 
-        const bidang =
-          `w - ${fxyz.toFixed(4)} = ${dfdx.toFixed(4)}(x - ${x}) + ` +
-          `${dfdy.toFixed(4)}(y - ${y}) + ` +
-          `${dfdz.toFixed(4)}(z - ${z})`;
+      // bentuk bidang singgung (diperbaiki)
+      const bidang =
+        `z = ${fxyz.toFixed(4)} + ` +
+        `${dfdx.toFixed(4)}(x - ${x}) + ` +
+        `${dfdy.toFixed(4)}(y - ${y}) + ` +
+        `${dfdz.toFixed(4)}(z - ${z})`;
 
-        hasilDiv.style.color = "#86efac";
-        hasilDiv.innerText =
-          `f(x,y,z) = ${fxyz.toFixed(4)}\n` +
-          `∂f/∂x = ${dfdx.toFixed(4)}\n` +
-          `∂f/∂y = ${dfdy.toFixed(4)}\n` +
-          `∂f/∂z = ${dfdz.toFixed(4)}\n\n` +
-          `Bidang Singgung:\n${bidang}`;
+      hasil.style.color = "#86efac";
+      hasil.innerText =
+        `f(x,y,z) = ${fxyz.toFixed(4)}\n` +
+        `∂f/∂x = ${dfdx.toFixed(4)}\n` +
+        `∂f/∂y = ${dfdy.toFixed(4)}\n` +
+        `∂f/∂z = ${dfdz.toFixed(4)}\n\n` +
+        `Bidang Singgung:\n${bidang}`;
 
-      } catch (e) {
-        hasilDiv.style.color = "#f87171";
-        hasilDiv.innerText = "⚠️ Error: " + e.message;
-      }
+    } catch (err) {
+      hasil.style.color = "#f87171";
+      hasil.innerText = "⚠️ Error menghitung fungsi!";
     }
+  }
 
-  </script>
-
+</script>
 </body>
 </html>
