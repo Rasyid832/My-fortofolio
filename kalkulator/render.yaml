@@ -1,0 +1,6 @@
+services:
+  - type: web
+    name: kalkulator-gradient
+    env: docker
+    plan: free
+    autoDeploy: true

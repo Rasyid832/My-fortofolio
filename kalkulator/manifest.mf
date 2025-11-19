@@ -1,0 +1,2 @@
+Main-Class: Main
+Class-Path: lib/exp4j-0.4.8.jar lib/json.jar
