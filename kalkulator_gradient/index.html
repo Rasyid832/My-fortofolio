@@ -190,11 +190,11 @@
 
         const fxyz = evalFx(fx, x, y, z);
 
-        const bidang =
-        `z = ${fxyz.toFixed(4)} + ` +
-        `${dfdx.toFixed(4)}(x - ${x}) + ` +
-        `${dfdy.toFixed(4)}(y - ${y}) + ` +
-        `${dfdz.toFixed(4)}(z - ${z})`;
+       const bidang =
+      `${dfdx.toFixed(4)}(x - ${x}) + ` +
+      `${dfdy.toFixed(4)}(y - ${y}) + ` +
+      `${dfdz.toFixed(4)}(z - ${z}) = 0`;
+
 
 
         hasilDiv.style.color = "#86efac";
